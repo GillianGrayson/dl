@@ -1,0 +1,9 @@
+dataclasses
+imgaug
+numpy
+torchvision
+torch
+comet_ml
+matplotlib
+torchsummary
+Poutyne
