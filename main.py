@@ -22,7 +22,7 @@ if __name__ == '__main__':
         'model': 'resnet18-finetune'
     }
     logging.info(f'Using device={device} 🚀')
-    # everything starts with the data
+    # everything starts with the dataset
     train_dl, val_dl, test_dl = get_dataloaders(
         project.data_dir / "train",
         project.data_dir / "val",
@@ -32,7 +32,7 @@ if __name__ == '__main__':
         pin_memory=True,
         num_workers=4,
     )
-    # is always good practice to visualise some of the train and val images to be sure data-aug
+    # is always good practice to visualise some of the train and val images to be sure dataset-aug
     # is applied properly
     show_dl(train_dl)
     show_dl(test_dl)

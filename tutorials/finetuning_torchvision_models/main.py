@@ -23,7 +23,7 @@ def run():
     print(device)
     #device = 'cpu'
 
-    # Top level data directory. Here we assume the format of the directory conforms
+    # Top level dataset directory. Here we assume the format of the directory conforms
     #   to the ImageFolder structure
     data_dir = 'E:/YandexDisk/Work/dl/datasets/hymenoptera_data'
 
