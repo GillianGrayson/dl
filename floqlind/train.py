@@ -4,6 +4,7 @@ import torch
 import time
 import copy
 from tqdm import tqdm
+import numpy as np
 
 
 def train_model(device, model, dataloaders, criterion, optimizer, num_epochs=25, is_inception=False):
@@ -13,12 +14,11 @@ def train_model(device, model, dataloaders, criterion, optimizer, num_epochs=25,
     val_loss_history = []
 
     best_model_wts = copy.deepcopy(model.state_dict())
-    best_loss = 0.0
+    best_loss = np.inf
 
-    for epoch in tqdm(range(num_epochs)):
-        print('Epoch {}/{}'.format(epoch, num_epochs - 1))
-        print('-' * 10)
-
+    for epoch in tqdm(range(num_epochs), desc='Training epochs'):
+        print('\n' + '-' * 32)
+        print('\n')
         # Each epoch has a training and validation phase
         for phase in ['train', 'val']:
             if phase == 'train':
@@ -81,7 +81,7 @@ def train_model(device, model, dataloaders, criterion, optimizer, num_epochs=25,
 
     time_elapsed = time.time() - since
     print('Training complete in {:.0f}m {:.0f}s'.format(time_elapsed // 60, time_elapsed % 60))
-    print(f'Best val loss: {epoch_loss}')
+    print(f'Best val loss: {best_loss}')
 
     # load best model weights
     model.load_state_dict(best_model_wts)

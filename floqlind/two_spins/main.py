@@ -19,7 +19,7 @@ if __name__ == '__main__':
     suffix = 'ampl(0.1000_0.1000_100)_freq(0.1000_0.1000_100)_phase(0.0000_0.0000_0)'
 
     # Models to choose from [resnet, alexnet, vgg, squeezenet, densenet, inception]
-    model_name = "resnet"
+    model_name = "vgg"
     model_dir = f'{path}/{model_name}'
     if not os.path.exists(model_dir):
         os.makedirs(model_dir)
@@ -28,7 +28,7 @@ if __name__ == '__main__':
     num_classes = 1
 
     # Batch size for training (change depending on how much memory you have)
-    batch_size = 128
+    batch_size = 32
 
     # Number of epochs to train for
     num_epochs = 100
@@ -49,7 +49,7 @@ if __name__ == '__main__':
     ])
 
     dataset = TwoSpinsDataset(path, suffix, transforms_regular)
-    datasets_dict = train_val_dataset(dataset, 0.20)
+    datasets_dict = train_val_dataset(dataset, 0.20, seed=1337)
 
     dataloaders_dict = {
         x: torch.utils.data.DataLoader(datasets_dict[x], batch_size=batch_size, shuffle=True, num_workers=4) for x in ['train', 'val']

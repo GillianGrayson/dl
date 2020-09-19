@@ -11,8 +11,10 @@ class TwoSpinsDataset(Dataset):
         s = 16
         num_channels = 3
 
-        self.norms = np.loadtxt(f'{path}/norm_dl_{suffix}.txt')
-        self.norms = np.log10(self.norms + 1.0e-6)
+        self.norms = np.loadtxt(f'{path}/norm_dl_1_{suffix}.txt')
+
+        min_norm = np.amin(self.norms, initial=10, where=self.norms>0)
+        self.norms = np.log10(self.norms + min_norm)
         self.norms = self.norms.astype(np.float32)
         num_points = self.norms.shape[0]
 
@@ -22,7 +24,18 @@ class TwoSpinsDataset(Dataset):
         if os.path.isfile(fn_npz):
             data = np.load(fn_npz)['data']
         else:
-            data = np.loadtxt(fn_txt)
+            data = np.zeros((num_points * s * s, 3), dtype=np.float64)
+            f = open(fn_txt)
+            row_id = 0
+            for line in tqdm(f, mininterval=60.0, desc='reading raw file'):
+                line_list = line.split('\t')
+                line_list[-1] = line_list[-1].rstrip()
+                data[row_id, 0] = np.float64(line_list[0])
+                data[row_id, 1] = np.float64(line_list[1])
+                data[row_id, 2] = np.float64(line_list[2])
+                row_id += 1
+            f.close()
+
             np.savez_compressed(fn_npz, data=data)
 
         data[:, 2] = np.angle(data[:, 0] + 1j * data[:, 1])
