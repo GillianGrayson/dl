@@ -4,21 +4,16 @@ import torch
 import time
 import copy
 from tqdm import tqdm
-import numpy as np
 
 
-def train_model(device, model, dataloaders, criterion, optimizer, num_epochs=25, is_inception=False):
+def train_model(device, model, dataloaders, criterion, optimizer, best_loss, num_epochs=25, is_inception=False):
     since = time.time()
 
     train_loss_history = []
     val_loss_history = []
 
     best_model_wts = copy.deepcopy(model.state_dict())
-    best_loss = np.inf
-
     for epoch in tqdm(range(num_epochs), desc='Training epochs'):
-        print('\n' + '-' * 32)
-        print('\n')
         # Each epoch has a training and validation phase
         for phase in ['train', 'val']:
             if phase == 'train':
@@ -66,7 +61,7 @@ def train_model(device, model, dataloaders, criterion, optimizer, num_epochs=25,
 
             epoch_loss = running_loss / len(dataloaders[phase].dataset)
 
-            print('{} Loss: {:.4f}'.format(phase, epoch_loss))
+            print(f'{phase} Loss: {epoch_loss}')
 
             # deep copy the model
             if phase == 'val' and epoch_loss < best_loss:
@@ -85,4 +80,4 @@ def train_model(device, model, dataloaders, criterion, optimizer, num_epochs=25,
 
     # load best model weights
     model.load_state_dict(best_model_wts)
-    return model, train_loss_history, val_loss_history
+    return model, best_loss, train_loss_history, val_loss_history
