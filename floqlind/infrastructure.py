@@ -2,8 +2,8 @@ from enum import Enum
 import socket
 
 class DataPath(Enum):
-    local_ah = 'E:/YandexDisk/Work/dl'
-    local_aa = 'E:/YandexDisk/dl'
+    local_ah = 'E:/YandexDisk/Work'
+    local_aa = 'E:/YandexDisk'
 
 def get_path():
     host_name = socket.gethostname()
