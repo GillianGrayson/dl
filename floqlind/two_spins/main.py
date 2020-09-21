@@ -2,11 +2,12 @@ from torchvision.transforms import transforms
 from torch.utils.data import DataLoader
 from floqlind.routines import get_device, train_val_dataset
 from floqlind.model import initialize_model, params_to_learn
-from floqlind.two_spins.dataset import TwoSpinsDataset
+from floqlind.two_spins.dataset import TwoSpinsDataset, TwoSpinsDataset2D
 import torch.optim as optim
 import torch
 import torch.nn as nn
 from floqlind.train import train_model
+from floqlind.infrastructure import get_path
 import numpy as np
 import os
 import re
@@ -16,11 +17,11 @@ if __name__ == '__main__':
 
     device = get_device()
 
-    path = 'E:/YandexDisk/Work/dl/datasets/floquet_lindbladian/two_spins'
+    path = get_path() + '/dl/datasets/floquet_lindbladian/two_spins'
     suffix = 'ampl(0.1000_0.1000_100)_freq(0.1000_0.1000_100)_phase(0.0000_0.0000_0)'
 
-    # Models to choose from [resnet, alexnet, vgg, squeezenet, densenet, inception]
-    model_name = "inception"
+    # Models to choose from [resnet, resnet50_2D, alexnet, vgg, squeezenet, densenet, inception]
+    model_name = "resnet50_2D"
     model_dir = f'{path}/{model_name}'
     if not os.path.exists(model_dir):
         os.makedirs(model_dir)
@@ -29,9 +30,13 @@ if __name__ == '__main__':
     feature_extract = False
 
     batch_size = 32
-    num_epochs = 400
+    num_epochs = 100
 
     is_continue = True
+    is_2D = True
+    if is_2D:
+        if not model_name.endswith('2D'):
+            raise ValueError('Wrong model for 2D')
 
     model, input_size = initialize_model(model_name, num_classes, feature_extract, use_pretrained=True)
     # Send the model to GPU
@@ -61,14 +66,26 @@ if __name__ == '__main__':
     print(model)
 
     # define transforms
-    transforms_regular = transforms.Compose([
-        transforms.ToPILImage(),
-        transforms.Resize((input_size, input_size)),
-        transforms.ToTensor(),
-        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-    ])
+    if is_2D:
+        transforms_regular = transforms.Compose([
+            transforms.ToPILImage(),
+            transforms.Resize((input_size, input_size)),
+            transforms.ToTensor(),
+            transforms.Normalize([0.5, 0.5], [0.25, 0.25])
+        ])
+    else:
+        transforms_regular = transforms.Compose([
+            transforms.ToPILImage(),
+            transforms.Resize((input_size, input_size)),
+            transforms.ToTensor(),
+            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+        ])
 
-    dataset = TwoSpinsDataset(path, suffix, transforms_regular)
+    if is_2D:
+        dataset = TwoSpinsDataset2D(path, suffix, transforms_regular)
+    else:
+        dataset = TwoSpinsDataset(path, suffix, transforms_regular)
+
     datasets_dict = train_val_dataset(dataset, 0.20, seed=1337)
 
     dataloaders_dict = {

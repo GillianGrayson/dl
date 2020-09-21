@@ -61,6 +61,16 @@ def initialize_model(model_name, num_classes, feature_extract, use_pretrained=Tr
         model_ft.classifier[6] = nn.Linear(num_ftrs, num_classes)
         input_size = 224
 
+    elif model_name == "resnet50_2D":
+        """ Resnet50_2D
+        """
+        model_ft = models.resnet50(pretrained=use_pretrained)
+        set_parameter_requires_grad(model_ft, feature_extract)
+        model_ft.conv1 = torch.nn.Conv2d(2, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
+        num_ftrs = model_ft.fc.in_features
+        model_ft.fc = nn.Linear(num_ftrs, num_classes)
+        input_size = 224
+
     elif model_name == "vgg":
         """ VGG11_bn
         """
