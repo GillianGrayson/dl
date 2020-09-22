@@ -22,10 +22,10 @@ if __name__ == '__main__':
 
     is_2D = False
 
-    function = 'lin'
+    function = 'log'
 
-    # Models to choose from [resnet, resnet50_2D, alexnet, vgg, squeezenet, densenet, inception]
-    model_name = "densenet"
+    # Models to choose from [resnet, alexnet, vgg, squeezenet, densenet, inception, resnet50_2D]
+    model_name = "resnet"
     model_dir = f'{path}/{model_name}_{function}_{suffix}'
     if not os.path.exists(model_dir):
         os.makedirs(model_dir)

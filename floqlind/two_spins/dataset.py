@@ -47,11 +47,12 @@ class TwoSpinsDataset(Dataset):
 
         self.images = np.zeros((num_points, s, s, num_channels), dtype=np.uint8)
         for point_id in tqdm(range(0, num_points), mininterval=10.0, desc='raw dataset processing'):
-            s_id = point_id * s
+            start_id = point_id * s * s
+            #print(f'start_id: {start_id}')
             for n_id in range(0, num_channels):
                 for row_id in range(0, s):
                     for col_id in range(0, s):
-                        global_id = s_id + row_id * s + col_id
+                        global_id = start_id + row_id * s + col_id
                         self.images[point_id][row_id][col_id][n_id] = data[global_id][n_id]
 
         self.transforms = transforms
@@ -108,11 +109,12 @@ class TwoSpinsDataset2D(Dataset):
 
         self.images = np.zeros((num_points, s, s, num_channels), dtype=np.uint8)
         for point_id in tqdm(range(0, num_points), mininterval=10.0, desc='raw dataset processing'):
-            s_id = point_id * s
+            start_id = point_id * s * s
+            #print(f'start_id: {start_id}')
             for n_id in range(0, num_channels):
                 for row_id in range(0, s):
                     for col_id in range(0, s):
-                        global_id = s_id + row_id * s + col_id
+                        global_id = start_id + row_id * s + col_id
                         self.images[point_id][row_id][col_id][n_id] = data[global_id][n_id]
 
         self.transforms = transforms
