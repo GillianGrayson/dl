@@ -18,11 +18,16 @@ if __name__ == '__main__':
     device = get_device()
 
     path = get_path() + '/dl/datasets/floquet_lindbladian/two_spins'
-    suffix = 'ampl(0.2000_0.2000_500)_freq(0.0200_0.0200_500)_phase(0.0000_0.0000_0)'
+    #suffix = 'ampl(0.2000_0.2000_500)_freq(0.0200_0.0200_500)_phase(0.0000_0.0000_0)'
+    suffix = 'ampl(0.0500_0.1000_100)_freq(0.0500_0.1000_100)_phase(0.0000_0.0000_0)'
+    suffix_model = 'ampl(0.1000_0.1000_100)_freq(0.1000_0.1000_100)_phase(0.0000_0.0000_0)'
 
     # Models to choose from [resnet, resnet50_2D, alexnet, vgg, squeezenet, densenet, inception]
     model_name = "resnet"
-    model_dir = f'{path}/{model_name}'
+    function = 'log'
+    is_2D = False
+
+    model_dir = f'{path}/{model_name}_{function}_{suffix_model}'
     if not os.path.exists(model_dir):
         os.makedirs(model_dir)
 
@@ -31,8 +36,7 @@ if __name__ == '__main__':
 
     batch_size = 1
 
-    is_continue = True
-    is_2D = False
+
     if is_2D:
         if not model_name.endswith('2D'):
             raise ValueError('Wrong model for 2D')
@@ -80,9 +84,9 @@ if __name__ == '__main__':
         ])
 
     if is_2D:
-        dataset = TwoSpinsDataset2D(path, suffix, transforms_regular)
+        dataset = TwoSpinsDataset2D(path, suffix, function, transforms_regular)
     else:
-        dataset = TwoSpinsDataset(path, suffix, transforms_regular)
+        dataset = TwoSpinsDataset(path, suffix, function, transforms_regular)
 
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False, num_workers=4)
 
@@ -110,6 +114,6 @@ if __name__ == '__main__':
     epoch_loss = current_loss / len(dataloader.dataset)
     print(f'Test loss: {epoch_loss}')
 
-    np.savetxt(f'{path}/{model_name}/norms_predicted_{last_epoch}_{suffix}.txt', np.asarray(outputs_all), fmt='%0.8e')
-    np.savetxt(f'{path}/{model_name}/loss_{last_epoch}_{suffix}.txt', np.asarray(losses_all), fmt='%0.8e')
+    np.savetxt(f'{model_dir}/norms_predicted_{last_epoch}_{suffix}.txt', np.asarray(outputs_all), fmt='%0.8e')
+    np.savetxt(f'{model_dir}/loss_{last_epoch}_{suffix}.txt', np.asarray(losses_all), fmt='%0.8e')
 
