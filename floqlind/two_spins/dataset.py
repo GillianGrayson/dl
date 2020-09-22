@@ -6,20 +6,20 @@ from tqdm import tqdm
 
 class TwoSpinsDataset(Dataset):
 
-    def __init__(self, path, suffix, transforms=None):
+    def __init__(self, path, suffix, function, transforms=None):
 
         s = 16
         num_channels = 3
 
         self.norms = np.loadtxt(f'{path}/norm_dl_1_{suffix}.txt')
-
-        min_norm = np.amin(self.norms, initial=10, where=self.norms>0)
-        self.norms = np.log10(self.norms + min_norm)
         self.norms = self.norms.astype(np.float32)
+        if function == 'log':
+            min_norm = np.amin(self.norms, initial=10, where=self.norms>0)
+            self.norms = np.log10(self.norms + min_norm)
         num_points = self.norms.shape[0]
 
         fn_txt = f'{path}/props_dl_{suffix}.txt'
-        fn_npz = f'{path}/props_dl_{suffix}.npz'
+        fn_npz = f'{path}/props_dl_3d_{suffix}.npz'
 
         if os.path.isfile(fn_npz):
             data = np.load(fn_npz)['data']
@@ -70,20 +70,20 @@ class TwoSpinsDataset(Dataset):
 
 class TwoSpinsDataset2D(Dataset):
 
-    def __init__(self, path, suffix, transforms=None):
+    def __init__(self, path, suffix, function, transforms=None):
 
         s = 16
         num_channels = 2
 
         self.norms = np.loadtxt(f'{path}/norm_dl_1_{suffix}.txt')
-
-        min_norm = np.amin(self.norms, initial=10, where=self.norms>0)
-        self.norms = np.log10(self.norms + min_norm)
         self.norms = self.norms.astype(np.float32)
+        if function == 'log':
+            min_norm = np.amin(self.norms, initial=10, where=self.norms>0)
+            self.norms = np.log10(self.norms + min_norm)
         num_points = self.norms.shape[0]
 
         fn_txt = f'{path}/props_dl_{suffix}.txt'
-        fn_npz = f'{path}/props_dl_{suffix}.npz'
+        fn_npz = f'{path}/props_dl_2d_{suffix}.npz'
 
         if os.path.isfile(fn_npz):
             data = np.load(fn_npz)['data']

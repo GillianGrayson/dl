@@ -20,9 +20,13 @@ if __name__ == '__main__':
     path = get_path() + '/dl/datasets/floquet_lindbladian/two_spins'
     suffix = 'ampl(0.1000_0.1000_100)_freq(0.1000_0.1000_100)_phase(0.0000_0.0000_0)'
 
+    is_2D = False
+
+    function = 'lin'
+
     # Models to choose from [resnet, resnet50_2D, alexnet, vgg, squeezenet, densenet, inception]
-    model_name = "resnet50_2D"
-    model_dir = f'{path}/{model_name}'
+    model_name = "densenet"
+    model_dir = f'{path}/{model_name}_{function}_{suffix}'
     if not os.path.exists(model_dir):
         os.makedirs(model_dir)
 
@@ -33,7 +37,7 @@ if __name__ == '__main__':
     num_epochs = 100
 
     is_continue = True
-    is_2D = True
+
     if is_2D:
         if not model_name.endswith('2D'):
             raise ValueError('Wrong model for 2D')
@@ -82,9 +86,9 @@ if __name__ == '__main__':
         ])
 
     if is_2D:
-        dataset = TwoSpinsDataset2D(path, suffix, transforms_regular)
+        dataset = TwoSpinsDataset2D(path, suffix, function, transforms_regular)
     else:
-        dataset = TwoSpinsDataset(path, suffix, transforms_regular)
+        dataset = TwoSpinsDataset(path, suffix, function, transforms_regular)
 
     datasets_dict = train_val_dataset(dataset, 0.20, seed=1337)
 
@@ -117,5 +121,5 @@ if __name__ == '__main__':
         'best_loss': best_loss_curr
     }, f'{model_dir}/checkpoint_{num_epochs + epoch_last}.pth')
 
-    np.savetxt(f'{path}/{model_name}/train_loss_{num_epochs + epoch_last}.txt', np.asarray(train_loss_history), fmt='%0.16e')
-    np.savetxt(f'{path}/{model_name}/val_loss_{num_epochs + epoch_last}.txt', np.asarray(val_loss_history), fmt='%0.16e')
+    np.savetxt(f'{model_dir}/train_loss_{num_epochs + epoch_last}.txt', np.asarray(train_loss_history), fmt='%0.16e')
+    np.savetxt(f'{model_dir}/val_loss_{num_epochs + epoch_last}.txt', np.asarray(val_loss_history), fmt='%0.16e')
