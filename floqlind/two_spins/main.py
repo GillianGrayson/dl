@@ -25,7 +25,7 @@ if __name__ == '__main__':
     function = 'log'
 
     # Models to choose from [resnet, alexnet, vgg, squeezenet, densenet, inception, resnet50_2D]
-    model_name = "inception"
+    model_name = "densenet"
     model_dir = f'{path}/{model_name}_{function}_{suffix}'
     if not os.path.exists(model_dir):
         os.makedirs(model_dir)

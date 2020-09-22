@@ -18,12 +18,12 @@ if __name__ == '__main__':
     device = get_device()
 
     path = get_path() + '/dl/datasets/floquet_lindbladian/two_spins'
-    #suffix = 'ampl(0.2000_0.2000_500)_freq(0.0200_0.0200_500)_phase(0.0000_0.0000_0)'
-    suffix = 'ampl(0.0500_0.1000_100)_freq(0.0500_0.1000_100)_phase(0.0000_0.0000_0)'
+
+    suffix_test = 'ampl(0.5000_0.5000_200)_freq(0.0500_0.0500_200)_phase(0.0000_0.0000_0)'
     suffix_model = 'ampl(0.1000_0.1000_100)_freq(0.1000_0.1000_100)_phase(0.0000_0.0000_0)'
 
     # Models to choose from [resnet, resnet50_2D, alexnet, vgg, squeezenet, densenet, inception]
-    model_name = "resnet"
+    model_name = "densenet"
     function = 'log'
     is_2D = False
 
@@ -84,9 +84,9 @@ if __name__ == '__main__':
         ])
 
     if is_2D:
-        dataset = TwoSpinsDataset2D(path, suffix, function, transforms_regular)
+        dataset = TwoSpinsDataset2D(path, suffix_test, function, transforms_regular)
     else:
-        dataset = TwoSpinsDataset(path, suffix, function, transforms_regular)
+        dataset = TwoSpinsDataset(path, suffix_test, function, transforms_regular)
 
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False, num_workers=4)
 
@@ -114,6 +114,6 @@ if __name__ == '__main__':
     epoch_loss = current_loss / len(dataloader.dataset)
     print(f'Test loss: {epoch_loss}')
 
-    np.savetxt(f'{model_dir}/norms_predicted_{last_epoch}_{suffix}.txt', np.asarray(outputs_all), fmt='%0.8e')
-    np.savetxt(f'{model_dir}/loss_{last_epoch}_{suffix}.txt', np.asarray(losses_all), fmt='%0.8e')
+    np.savetxt(f'{model_dir}/norms_predicted_{last_epoch}_{suffix_test}.txt', np.asarray(outputs_all), fmt='%0.8e')
+    np.savetxt(f'{model_dir}/loss_{last_epoch}_{suffix_test}.txt', np.asarray(losses_all), fmt='%0.8e')
 

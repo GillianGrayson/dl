@@ -12,16 +12,16 @@ mkdir(figures_path);
 gamma_1 = 0.05;
 gamma_2 = 0.05;
 
-ampl_begin = 0.05;
-ampl_shift = 0.1;
+ampl_begin = 0.5;
+ampl_shift = 0.5;
 ampl_num = 10;
-ampl_chunks = 10;
+ampl_chunks = 20;
 ampl_stride = ampl_shift * ampl_num;
 
 freq_begin = 0.05;
-freq_shift = 0.1;
+freq_shift = 0.05;
 freq_num = 10;
-freq_chunks = 10;
+freq_chunks = 20;
 freq_stride = freq_shift * freq_num;
 ph = 0;
 
