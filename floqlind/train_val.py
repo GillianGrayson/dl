@@ -1,13 +1,13 @@
 from torchvision.transforms import transforms
 from torch.utils.data import DataLoader
-from floqlind.routines import get_device, train_val_dataset
-from floqlind.model import initialize_model, params_to_learn
-from floqlind.two_spins.dataset import TwoSpinsDataset, TwoSpinsDataset2D
+from floqlind.routines.routines import get_device, train_val_dataset
+from floqlind.routines.model import initialize_model, params_to_learn
+from floqlind.routines.dataset import FloqLindDataset, FloqLindDataset2D
 import torch.optim as optim
 import torch
 import torch.nn as nn
-from floqlind.train import train_model
-from floqlind.infrastructure import get_path
+from floqlind.routines.train import train_model
+from floqlind.routines.infrastructure import get_path
 import numpy as np
 import os
 import re
@@ -17,16 +17,19 @@ if __name__ == '__main__':
 
     device = get_device()
 
-    path = get_path() + '/dl/datasets/floquet_lindbladian/two_spins'
-    suffix = 'ampl(0.5000_0.5000_200)_freq(0.0500_0.0500_200)_phase(0.0000_0.0000_0)'
+    system_train = 'two_spins'
+    size = 16
+
+    path_train = get_path() + f'/dl/datasets/floquet_lindbladian/{system_train}'
+    suffix_train = 'ampl(0.5000_0.5000_200)_freq(0.0500_0.0500_200)_phase(0.0000_0.0000_0)'
 
     is_2D = False
 
-    function = 'log'
+    function = 'log_with_add'
 
     # Models to choose from [resnet, vgg, densenet, inception, resnet50_2D]
     model_name = "resnet"
-    model_dir = f'{path}/{model_name}_{function}_{suffix}'
+    model_dir = f'{path_train}/{model_name}_{function}_{suffix_train}'
     if not os.path.exists(model_dir):
         os.makedirs(model_dir)
 
@@ -86,9 +89,9 @@ if __name__ == '__main__':
         ])
 
     if is_2D:
-        dataset = TwoSpinsDataset2D(path, suffix, function, transforms_regular)
+        dataset = FloqLindDataset2D(path_train, size,  suffix_train, function, transforms_regular)
     else:
-        dataset = TwoSpinsDataset(path, suffix, function, transforms_regular)
+        dataset = FloqLindDataset(path_train, size, suffix_train, function, transforms_regular)
 
     datasets_dict = train_val_dataset(dataset, 0.20, seed=1337)
 

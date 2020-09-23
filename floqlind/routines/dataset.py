@@ -3,21 +3,27 @@ import numpy as np
 from torch.utils.data import Dataset
 from tqdm import tqdm
 
+def norm_processing(norms, function):
+    if function == 'log':
+        min_norm = np.amin(norms, initial=10, where=norms > 0)
+        norms = np.log10(norms + min_norm)
+    elif function == 'log_with_add':
+        norms = np.log10(norms + 1e-16)
 
-class TwoSpinsDataset(Dataset):
+    return norms
 
-    def __init__(self, path, suffix, function, transforms=None):
 
-        s = 16
+class FloqLindDataset(Dataset):
+
+    def __init__(self, path, size, suffix, function, transforms):
+
+        s = size
         num_channels = 3
 
         self.norms = np.loadtxt(f'{path}/norm_dl_1_{suffix}.txt')
         self.norms = self.norms.astype(np.float32)
-        if function == 'log':
-            min_norm = np.amin(self.norms, initial=10, where=self.norms>0)
-            self.norms = np.log10(self.norms + min_norm)
-        elif function == 'log_with_add':
-            self.norms = np.log10(self.norms + 1e-16)
+        self.norms = norm_processing(self.norms, function)
+
         num_points = self.norms.shape[0]
 
         fn_txt = f'{path}/props_dl_{suffix}.txt'
@@ -71,18 +77,17 @@ class TwoSpinsDataset(Dataset):
         return (data, self.norms[i])
 
 
-class TwoSpinsDataset2D(Dataset):
+class FloqLindDataset2D(Dataset):
 
-    def __init__(self, path, suffix, function, transforms=None):
+    def __init__(self, path, size, suffix, function, transforms):
 
-        s = 16
+        s = size
         num_channels = 2
 
         self.norms = np.loadtxt(f'{path}/norm_dl_1_{suffix}.txt')
         self.norms = self.norms.astype(np.float32)
-        if function == 'log':
-            min_norm = np.amin(self.norms, initial=10, where=self.norms>0)
-            self.norms = np.log10(self.norms + min_norm)
+        self.norms = norm_processing(self.norms, function)
+
         num_points = self.norms.shape[0]
 
         fn_txt = f'{path}/props_dl_{suffix}.txt'
