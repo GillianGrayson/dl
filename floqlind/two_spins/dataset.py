@@ -16,6 +16,8 @@ class TwoSpinsDataset(Dataset):
         if function == 'log':
             min_norm = np.amin(self.norms, initial=10, where=self.norms>0)
             self.norms = np.log10(self.norms + min_norm)
+        elif function == 'log_with_add':
+            self.norms = np.log10(self.norms + 1e-16)
         num_points = self.norms.shape[0]
 
         fn_txt = f'{path}/props_dl_{suffix}.txt'

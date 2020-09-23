@@ -18,14 +18,14 @@ if __name__ == '__main__':
     device = get_device()
 
     path = get_path() + '/dl/datasets/floquet_lindbladian/two_spins'
-    suffix = 'ampl(0.1000_0.1000_100)_freq(0.1000_0.1000_100)_phase(0.0000_0.0000_0)'
+    suffix = 'ampl(0.5000_0.5000_200)_freq(0.0500_0.0500_200)_phase(0.0000_0.0000_0)'
 
     is_2D = False
 
     function = 'log'
 
-    # Models to choose from [resnet, alexnet, vgg, squeezenet, densenet, inception, resnet50_2D]
-    model_name = "densenet"
+    # Models to choose from [resnet, vgg, densenet, inception, resnet50_2D]
+    model_name = "resnet"
     model_dir = f'{path}/{model_name}_{function}_{suffix}'
     if not os.path.exists(model_dir):
         os.makedirs(model_dir)

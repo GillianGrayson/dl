@@ -19,8 +19,8 @@ if __name__ == '__main__':
 
     path = get_path() + '/dl/datasets/floquet_lindbladian/two_spins'
 
-    suffix_test = 'ampl(0.5000_0.5000_200)_freq(0.0500_0.0500_200)_phase(0.0000_0.0000_0)'
-    suffix_model = 'ampl(0.1000_0.1000_100)_freq(0.1000_0.1000_100)_phase(0.0000_0.0000_0)'
+    suffix_test = 'ampl(0.2000_0.2000_500)_freq(0.0200_0.0200_500)_phase(0.0000_0.0000_0)'
+    suffix_model = 'ampl(0.5000_0.5000_200)_freq(0.0500_0.0500_200)_phase(0.0000_0.0000_0)'
 
     # Models to choose from [resnet, resnet50_2D, alexnet, vgg, squeezenet, densenet, inception]
     model_name = "densenet"

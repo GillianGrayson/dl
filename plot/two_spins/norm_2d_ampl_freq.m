@@ -3,8 +3,8 @@ addpath('E:/Work/os_lnd/source/matlab/lib')
 
 path = 'E:/YandexDisk/Work/dl/datasets/floquet_lindbladian/two_spins';
 
-model = 'resnet_log_ampl(0.1000_0.1000_100)_freq(0.1000_0.1000_100)_phase(0.0000_0.0000_0)';
-epochs = 100;
+model = 'densenet_log_ampl(0.5000_0.5000_200)_freq(0.0500_0.0500_200)_phase(0.0000_0.0000_0)';
+epochs = 200;
 
 figures_path = sprintf('%s/%s/figures', path, model);
 mkdir(figures_path);
@@ -12,16 +12,16 @@ mkdir(figures_path);
 gamma_1 = 0.05;
 gamma_2 = 0.05;
 
-ampl_begin = 0.5;
-ampl_shift = 0.5;
+ampl_begin = 0.2;
+ampl_shift = 0.2;
 ampl_num = 10;
-ampl_chunks = 20;
+ampl_chunks = 50;
 ampl_stride = ampl_shift * ampl_num;
 
-freq_begin = 0.05;
-freq_shift = 0.05;
+freq_begin = 0.02;
+freq_shift = 0.02;
 freq_num = 10;
-freq_chunks = 20;
+freq_chunks = 50;
 freq_stride = freq_shift * freq_num;
 ph = 0;
 
@@ -73,8 +73,7 @@ for ampl_id = 1:ampl_num_global
     end
 end
 
-add_eps = min(norms_original(norms_original>0));
-norms_original = log10(norms_original + add_eps);
+norms_original = log10(norms_original);
 
 fig = figure;
 imagesc(ampls, freqs, norms_original');
