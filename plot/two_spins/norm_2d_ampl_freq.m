@@ -2,9 +2,10 @@ clear all;
 addpath('E:/Work/os_lnd/source/matlab/lib')
 
 system_train = 'two_spins';
-system_test = 'two_spins';
+system_test = 'ospm';
 
 path_train = sprintf('E:/YandexDisk/Work/dl/datasets/floquet_lindbladian/%s', system_train);
+path_test = sprintf('E:/YandexDisk/Work/dl/datasets/floquet_lindbladian/%s', system_test);
 
 model = 'resnet_log_ampl(0.5000_0.5000_200)_freq(0.0500_0.0500_200)_phase(0.0000_0.0000_0)';
 epochs = 200;
@@ -12,19 +13,16 @@ epochs = 200;
 figures_path = sprintf('%s/%s/test/%s/figures', path_train, model, system_test);
 mkdir(figures_path);
 
-gamma_1 = 0.05;
-gamma_2 = 0.05;
-
-ampl_begin = 0.2;
-ampl_shift = 0.2;
+ampl_begin = 0.25;
+ampl_shift = 0.25;
 ampl_num = 10;
-ampl_chunks = 50;
+ampl_chunks = 20;
 ampl_stride = ampl_shift * ampl_num;
 
-freq_begin = 0.02;
-freq_shift = 0.02;
+freq_begin = 0.025;
+freq_shift = 0.025;
 freq_num = 10;
-freq_chunks = 50;
+freq_chunks = 20;
 freq_stride = freq_shift * freq_num;
 ph = 0;
 
@@ -42,13 +40,13 @@ suffix = sprintf('ampl(%0.4f_%0.4f_%d)_freq(%0.4f_%0.4f_%d)_phase(%0.4f_%0.4f_%d
     0, ...
     0);
 
-fn_txt = sprintf('%s/ampls_dl_%s.txt', path_train, suffix);
+fn_txt = sprintf('%s/ampls_dl_%s.txt', path_test, suffix);
 ampls_dl = importdata(fn_txt);
 
-fn_txt = sprintf('%s/freqs_dl_%s.txt', path_train, suffix);
+fn_txt = sprintf('%s/freqs_dl_%s.txt', path_test, suffix);
 freqs_dl = importdata(fn_txt);
 
-fn_txt = sprintf('%s/norm_dl_1_%s.txt', path_train, suffix);
+fn_txt = sprintf('%s/norm_dl_1_%s.txt', path_test, suffix);
 norm_dl_1 = importdata(fn_txt);
 
 fn_txt = sprintf('%s/%s/test/%s/norms_predicted_%d_%s.txt', path_train, model, system_test, epochs, suffix);
