@@ -15,18 +15,23 @@ if __name__ == '__main__':
 
     device = get_device()
 
-    system_train = 'two_spins'
-    system_test = 'ospm'
-    size = 16
+    system_train = 'ospm'
+    system_test = 'two_spins'
+    if system_test in ['ospm', 'two_spins']:
+        size = 16
+    elif system_test in ['os']:
+        size = 4
+    else:
+        raise ValueError('unsupported test system')
 
     path_train = get_path() + f'/dl/datasets/floquet_lindbladian/{system_train}'
     path_test = get_path() + f'/dl/datasets/floquet_lindbladian/{system_test}'
 
-    suffix_train = 'ampl(0.5000_0.5000_200)_freq(0.0500_0.0500_200)_phase(0.0000_0.0000_0)'
-    suffix_test = 'ampl(0.2500_0.2500_200)_freq(0.0250_0.0250_200)_phase(0.0000_0.0000_0)'
+    suffix_train = 'ampl(0.2500_0.2500_200)_freq(0.0250_0.0250_200)_phase(0.0000_0.0000_0)'
+    suffix_test = 'ampl(0.5000_0.5000_200)_freq(0.0500_0.0500_200)_phase(0.0000_0.0000_0)'
 
     # Models to choose from [resnet, resnet50_2D, alexnet, vgg, squeezenet, densenet, inception]
-    model_name = "resnet"
+    model_name = "densenet"
     function = 'log'
     is_2D = False
 

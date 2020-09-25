@@ -17,15 +17,15 @@ if __name__ == '__main__':
 
     device = get_device()
 
-    system_train = 'two_spins'
+    system_train = 'ospm'
     size = 16
 
     path_train = get_path() + f'/dl/datasets/floquet_lindbladian/{system_train}'
-    suffix_train = 'ampl(0.5000_0.5000_200)_freq(0.0500_0.0500_200)_phase(0.0000_0.0000_0)'
+    suffix_train = 'ampl(0.2500_0.2500_200)_freq(0.0250_0.0250_200)_phase(0.0000_0.0000_0)'
 
     is_2D = False
 
-    function = 'log_with_add'
+    function = 'log'
 
     # Models to choose from [resnet, vgg, densenet, inception, resnet50_2D]
     model_name = "resnet"
