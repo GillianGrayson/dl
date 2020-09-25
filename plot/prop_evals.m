@@ -11,7 +11,7 @@ to = 1e-4;
 
 path = sprintf('E:/YandexDisk/Work/dl/datasets/floquet_lindbladian/%s', system);
 
-figures_path = sprintf('%s/figures', path);
+figures_path = sprintf('%s/figures/props_evals', path);
 mkdir(figures_path);
 
 ampl_begin = 0.02;

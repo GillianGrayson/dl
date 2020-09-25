@@ -42,7 +42,7 @@ if __name__ == '__main__':
 
     dataset = FloqLindDataset(path, size, suffix, function, transforms_regular)
 
-    fig_path = f'{path}/props_as_figures'
+    fig_path = f'{path}/figures/props'
     if not os.path.exists(fig_path):
         os.makedirs(fig_path)
 
@@ -55,6 +55,6 @@ if __name__ == '__main__':
 
         img = transforms.ToPILImage()(sample[0])
 
-        fn = f'{fig_path}/x({point[0]})_y({point[1]})_norm({sample[1]:0.4f}).bmp'
+        fn = f'{fig_path}/x({point[0]})_y({point[1]})_num_points({num_points})_norm({sample[1]:0.4f}).bmp'
 
         img.save(fn)
