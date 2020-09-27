@@ -1,14 +1,8 @@
 from torchvision.transforms import transforms
-from torch.utils.data import DataLoader
 from floqlind.routines.routines import get_device
-from floqlind.routines.model import initialize_model
-from floqlind.routines.dataset import FloqLindDataset, FloqLindDataset2D
-import torch
-import torch.nn as nn
+from floqlind.routines.dataset import FloqLindDataset
 from floqlind.routines.infrastructure import get_path
-import numpy as np
 import os
-import re
 
 
 if __name__ == '__main__':
@@ -29,20 +23,29 @@ if __name__ == '__main__':
     num_points = 200
     suffix = f'ampl(0.5000_0.5000_{num_points})_freq(0.0500_0.0500_{num_points})_phase(0.0000_0.0000_0)'
 
+    feature_type = 'eval'
+    transforms_type = 'noNorm'
+    label_type = 'log'
 
-    function = 'log'
+    if transforms_type == 'regular':
+        transforms_regular = transforms.Compose([
+            transforms.ToPILImage(),
+            transforms.Resize((input_size, input_size)),
+            transforms.ToTensor(),
+            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+        ])
+    elif transforms_type == 'noNorm':
+        transforms_regular = transforms.Compose([
+            transforms.ToPILImage(),
+            transforms.Resize((input_size, input_size)),
+            transforms.ToTensor(),
+        ])
+    else:
+        raise ValueError(f'Unsupported transforms_type: {transforms_type}')
 
-    transforms_regular = transforms.Compose([
-        transforms.ToPILImage(),
-        transforms.Resize((input_size, input_size)),
-        transforms.ToTensor(),
-        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-    ])
+    dataset = FloqLindDataset(path, size, suffix, feature_type, label_type, transforms_regular)
 
-
-    dataset = FloqLindDataset(path, size, suffix, function, transforms_regular)
-
-    fig_path = f'{path}/figures/props'
+    fig_path = f'{path}/figures/images/{feature_type}_{transforms_type}'
     if not os.path.exists(fig_path):
         os.makedirs(fig_path)
 

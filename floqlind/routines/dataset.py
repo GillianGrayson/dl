@@ -2,129 +2,135 @@ import os
 import numpy as np
 from torch.utils.data import Dataset
 from tqdm import tqdm
+from numpy import linalg as LA
+from floqlind.routines.pdf import PDF
 
-def norm_processing(norms, function):
-    if function == 'log':
+
+def norm_processing(norms, label_type):
+    if label_type == 'log':
         min_norm = np.amin(norms, initial=10, where=norms > 0)
         norms = np.log10(norms + min_norm)
-    elif function == 'log_with_add':
+    elif label_type == 'log_with_add':
         norms = np.log10(norms + 1e-16)
-
     return norms
+
+def loda_features(size, num_subj, path, suffix):
+
+    fn_txt = f'{path}/props_dl_{suffix}.txt'
+    fn_npz = f'{path}/props_dl_3d_{suffix}.npz'
+
+    if os.path.isfile(fn_npz):
+        data = np.load(fn_npz)['data']
+    else:
+        data = np.zeros((num_subj * size * size, 3), dtype=np.float64)
+        f = open(fn_txt)
+        row_id = 0
+        for line in tqdm(f, mininterval=60.0, desc='reading raw file'):
+            line_list = line.split('\t')
+            line_list[-1] = line_list[-1].rstrip()
+            data[row_id, 0] = np.float64(line_list[0])
+            data[row_id, 1] = np.float64(line_list[1])
+            data[row_id, 2] = np.float64(line_list[2])
+            row_id += 1
+        f.close()
+
+        np.savez_compressed(fn_npz, data=data)
+
+    return data
 
 
 class FloqLindDataset(Dataset):
 
-    def __init__(self, path, size, suffix, function, transforms):
+    def __init__(self, path, size, suffix, features_type, label_type, transforms):
+
+        self.transforms = transforms
 
         s = size
         num_channels = 3
 
         self.norms = np.loadtxt(f'{path}/norm_dl_1_{suffix}.txt')
         self.norms = self.norms.astype(np.float32)
-        self.norms = norm_processing(self.norms, function)
+        self.norms = norm_processing(self.norms, label_type)
 
-        num_points = self.norms.shape[0]
+        num_subj = self.norms.shape[0]
 
-        fn_txt = f'{path}/props_dl_{suffix}.txt'
-        fn_npz = f'{path}/props_dl_3d_{suffix}.npz'
+        data = loda_features(size, num_subj, path, suffix)
 
+
+        fn_npz = f'{path}/images_{features_type}_{suffix}.npz'
         if os.path.isfile(fn_npz):
-            data = np.load(fn_npz)['data']
+            self.images = np.load(fn_npz)['images']
         else:
-            data = np.zeros((num_points * s * s, 3), dtype=np.float64)
-            f = open(fn_txt)
-            row_id = 0
-            for line in tqdm(f, mininterval=60.0, desc='reading raw file'):
-                line_list = line.split('\t')
-                line_list[-1] = line_list[-1].rstrip()
-                data[row_id, 0] = np.float64(line_list[0])
-                data[row_id, 1] = np.float64(line_list[1])
-                data[row_id, 2] = np.float64(line_list[2])
-                row_id += 1
-            f.close()
 
-            np.savez_compressed(fn_npz, data=data)
+            if features_type == 'prop':
 
-        data[:, 2] = np.angle(data[:, 0] + 1j * data[:, 1])
+                data[:, 2] = np.angle(data[:, 0] + 1j * data[:, 1])
 
-        for n_id in range(0, num_channels):
-            data[:, n_id] = (255.0 * (data[:, n_id] - np.min(data[:, n_id])) / np.ptp(data[:, n_id]))
+                for n_id in range(0, num_channels):
+                    data[:, n_id] = (255.0 * (data[:, n_id] - np.min(data[:, n_id])) / np.ptp(data[:, n_id]))
 
-        data = data.astype(np.uint8)
+                data = data.astype(np.uint8)
 
-        self.images = np.zeros((num_points, s, s, num_channels), dtype=np.uint8)
-        for point_id in tqdm(range(0, num_points), mininterval=10.0, desc='raw dataset processing'):
-            start_id = point_id * s * s
-            #print(f'start_id: {start_id}')
-            for n_id in range(0, num_channels):
-                for row_id in range(0, s):
-                    for col_id in range(0, s):
-                        global_id = start_id + row_id * s + col_id
-                        self.images[point_id][row_id][col_id][n_id] = data[global_id][n_id]
+                self.images = np.zeros((num_subj, s, s, num_channels), dtype=np.uint8)
+                for point_id in tqdm(range(0, num_subj), mininterval=10.0, desc='raw dataset processing'):
+                    start_id = point_id * s * s
+                    for n_id in range(0, num_channels):
+                        for row_id in range(0, s):
+                            for col_id in range(0, s):
+                                global_id = start_id + row_id * s + col_id
+                                self.images[point_id][row_id][col_id][n_id] = data[global_id][n_id]
 
-        self.transforms = transforms
+            elif features_type == 'eval':
+                pdf_size = 224
 
-    def __len__(self):
-        return (len(self.norms))
+                x_bin_s = -1.05
+                x_bin_f = 1.05
 
-    def __getitem__(self, i):
-        data = self.images[i]
+                y_bin_s = -1.05
+                y_bin_f = 1.05
 
-        if self.transforms:
-            data = self.transforms(data)
+                self.images = np.zeros((num_subj, pdf_size, pdf_size, num_channels), dtype=np.uint8)
 
-        return (data, self.norms[i])
+                for point_id in tqdm(range(0, num_subj), mininterval=10.0, desc='raw dataset processing'):
+                    start_id = point_id * s * s
 
+                    prop_mtx = np.zeros((s, s), dtype=complex)
+                    for row_id in range(0, s):
+                        for col_id in range(0, s):
+                            global_id = start_id + row_id * s + col_id
+                            prop_mtx[row_id][col_id] = data[global_id][0] + 1j * data[global_id][1]
 
-class FloqLindDataset2D(Dataset):
+                    evals = LA.eigvals(prop_mtx)
+                    evals_data = np.vstack((np.real(evals), np.imag(evals))).T
+                    evals_pdf = PDF(x_bin_s, x_bin_f, pdf_size, y_bin_s, y_bin_f, pdf_size)
+                    evals_pdf.update(evals_data)
+                    evals_pdf.release()
+                    evals_pdf.to_int()
 
-    def __init__(self, path, size, suffix, function, transforms):
+                    cross_x = np.vstack([evals_pdf.x_bin_centers, np.zeros(len(evals_pdf.x_bin_centers), dtype=np.float64)]).T
+                    cross_y = np.vstack([np.zeros(len(evals_pdf.y_bin_centers), dtype=np.float64), evals_pdf.y_bin_centers]).T
+                    cross_data = np.concatenate((cross_x, cross_y), axis=0)
+                    cross_pdf = PDF(x_bin_s, x_bin_f, pdf_size, y_bin_s, y_bin_f, pdf_size)
+                    cross_pdf.update(cross_data)
+                    cross_pdf.release()
+                    cross_pdf.to_int()
 
-        s = size
-        num_channels = 2
+                    phase = np.linspace(0.0, 2.0 * np.pi, 1000)
+                    circle_data = np.vstack([np.cos(phase), np.sin(phase)]).T
+                    circle_pdf = PDF(x_bin_s, x_bin_f, pdf_size, y_bin_s, y_bin_f, pdf_size)
+                    circle_pdf.update(circle_data)
+                    circle_pdf.release()
+                    circle_pdf.to_int()
 
-        self.norms = np.loadtxt(f'{path}/norm_dl_1_{suffix}.txt')
-        self.norms = self.norms.astype(np.float32)
-        self.norms = norm_processing(self.norms, function)
+                    for row_id in range(0, pdf_size):
+                        for col_id in range(0, pdf_size):
+                            self.images[point_id][row_id][col_id][0] = evals_pdf.pdf[row_id][col_id]
+                            self.images[point_id][row_id][col_id][1] = cross_pdf.pdf[row_id][col_id]
+                            self.images[point_id][row_id][col_id][2] = circle_pdf.pdf[row_id][col_id]
+            else:
+                raise ValueError(f'Unsupported feature_type: {features_type}')
 
-        num_points = self.norms.shape[0]
-
-        fn_txt = f'{path}/props_dl_{suffix}.txt'
-        fn_npz = f'{path}/props_dl_2d_{suffix}.npz'
-
-        if os.path.isfile(fn_npz):
-            data = np.load(fn_npz)['data']
-        else:
-            data = np.zeros((num_points * s * s, 2), dtype=np.float64)
-            f = open(fn_txt)
-            row_id = 0
-            for line in tqdm(f, mininterval=60.0, desc='reading raw file'):
-                line_list = line.split('\t')
-                line_list[-1] = line_list[-1].rstrip()
-                data[row_id, 0] = np.float64(line_list[0])
-                data[row_id, 1] = np.float64(line_list[1])
-                row_id += 1
-            f.close()
-
-            np.savez_compressed(fn_npz, data=data)
-
-        for n_id in range(0, num_channels):
-            data[:, n_id] = (255.0 * (data[:, n_id] - np.min(data[:, n_id])) / np.ptp(data[:, n_id]))
-
-        data = data.astype(np.uint8)
-
-        self.images = np.zeros((num_points, s, s, num_channels), dtype=np.uint8)
-        for point_id in tqdm(range(0, num_points), mininterval=10.0, desc='raw dataset processing'):
-            start_id = point_id * s * s
-            #print(f'start_id: {start_id}')
-            for n_id in range(0, num_channels):
-                for row_id in range(0, s):
-                    for col_id in range(0, s):
-                        global_id = start_id + row_id * s + col_id
-                        self.images[point_id][row_id][col_id][n_id] = data[global_id][n_id]
-
-        self.transforms = transforms
+            np.savez_compressed(fn_npz, images=self.images)
 
     def __len__(self):
         return (len(self.norms))

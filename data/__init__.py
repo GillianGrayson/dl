@@ -13,7 +13,7 @@ def get_dataloaders(
         batch_size=32,
         *args, **kwargs):
     """
-    This function returns the train, val and test dataloaders.
+    This label_type returns the train, val and test dataloaders.
     """
     # create the datasets
     train_ds = ImageFolder(root=train_dir, transform=train_transform)

@@ -1,6 +1,6 @@
 from poutyne.framework.metrics import EpochMetric
 
-# define a custom metric as a function
+# define a custom metric as a label_type
 def my_metric(y_true, y_pred):
     pass
 

@@ -2,7 +2,7 @@ from torchvision.transforms import transforms
 from torch.utils.data import DataLoader
 from floqlind.routines.routines import get_device, train_val_dataset
 from floqlind.routines.model import initialize_model, params_to_learn
-from floqlind.routines.dataset import FloqLindDataset, FloqLindDataset2D
+from floqlind.routines.dataset import FloqLindDataset
 import torch.optim as optim
 import torch
 import torch.nn as nn
@@ -23,13 +23,13 @@ if __name__ == '__main__':
     path_train = get_path() + f'/dl/datasets/floquet_lindbladian/{system_train}'
     suffix_train = 'ampl(0.5000_0.5000_200)_freq(0.0500_0.0500_200)_phase(0.0000_0.0000_0)'
 
-    is_2D = False
-
-    function = 'log'
+    feature_type = 'eval'
+    transforms_type = 'noNorm'
+    label_type = 'log'
 
     # Models to choose from [resnet, vgg, densenet, inception, resnet50_2D]
-    model_name = "inception"
-    model_dir = f'{path_train}/{model_name}_{function}_{suffix_train}'
+    model_name = "resnet"
+    model_dir = f'{path_train}/{model_name}_{feature_type}_{transforms_type}_{label_type}_{suffix_train}'
     if not os.path.exists(model_dir):
         os.makedirs(model_dir)
 
@@ -40,10 +40,6 @@ if __name__ == '__main__':
     num_epochs = 100
 
     is_continue = True
-
-    if is_2D:
-        if not model_name.endswith('2D'):
-            raise ValueError('Wrong model for 2D')
 
     model, input_size = initialize_model(model_name, num_classes, feature_extract, use_pretrained=True)
     # Send the model to GPU
@@ -73,25 +69,23 @@ if __name__ == '__main__':
     print(model)
 
     # define transforms
-    if is_2D:
-        transforms_regular = transforms.Compose([
-            transforms.ToPILImage(),
-            transforms.Resize((input_size, input_size)),
-            transforms.ToTensor(),
-            transforms.Normalize([0.5, 0.5], [0.25, 0.25])
-        ])
-    else:
+    if transforms_type == 'regular':
         transforms_regular = transforms.Compose([
             transforms.ToPILImage(),
             transforms.Resize((input_size, input_size)),
             transforms.ToTensor(),
             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
         ])
-
-    if is_2D:
-        dataset = FloqLindDataset2D(path_train, size,  suffix_train, function, transforms_regular)
+    elif transforms_type == 'noNorm':
+        transforms_regular = transforms.Compose([
+            transforms.ToPILImage(),
+            transforms.Resize((input_size, input_size)),
+            transforms.ToTensor(),
+        ])
     else:
-        dataset = FloqLindDataset(path_train, size, suffix_train, function, transforms_regular)
+        raise ValueError(f'Unsupported transforms_type: {transforms_type}')
+
+    dataset = FloqLindDataset(path_train, size, suffix_train, feature_type, label_type, transforms_regular)
 
     datasets_dict = train_val_dataset(dataset, 0.20, seed=1337)
 

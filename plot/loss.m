@@ -2,13 +2,11 @@ clear all;
 addpath('E:/Work/os_lnd/source/matlab/lib')
 
 system = 'two_spins';
-num_epoches = 100;
-suffix = 'ampl(0.1000_0.1000_100)_freq(0.1000_0.1000_100)_phase(0.0000_0.0000_0)';
+num_epoches = 200;
+suffix = 'ampl(0.5000_0.5000_200)_freq(0.0500_0.0500_200)_phase(0.0000_0.0000_0)';
 models = {
     'resnet_log';
-    'vgg_log';
     'densenet_log';
-    'inception_log'
     };
 
 x = linspace(1, num_epoches, num_epoches);
