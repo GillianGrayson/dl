@@ -89,6 +89,35 @@ class FloqLindDataset(Dataset):
                 y_bin_s = -1.05
                 y_bin_f = 1.05
 
+                x_bin_shift = (x_bin_f - x_bin_s) / pdf_size
+                y_bin_shift = (y_bin_f - y_bin_s) / pdf_size
+
+                x_bin_centers = np.linspace(
+                    x_bin_s + 0.5 * x_bin_shift,
+                    x_bin_f - 0.5 * x_bin_shift,
+                    pdf_size
+                )
+                y_bin_centers = np.linspace(
+                    y_bin_s + 0.5 * y_bin_shift,
+                    y_bin_f - 0.5 * y_bin_shift,
+                    pdf_size
+                )
+
+                cross_x = np.vstack([x_bin_centers, np.zeros(len(x_bin_centers), dtype=np.float64)]).T
+                cross_y = np.vstack([np.zeros(len(y_bin_centers), dtype=np.float64), y_bin_centers]).T
+                cross_data = np.concatenate((cross_x, cross_y), axis=0)
+                cross_pdf = PDF(x_bin_s, x_bin_f, pdf_size, y_bin_s, y_bin_f, pdf_size)
+                cross_pdf.update(cross_data)
+                cross_pdf.release()
+                cross_pdf.to_int()
+
+                phase = np.linspace(0.0, 2.0 * np.pi, 10000)
+                circle_data = np.vstack([np.cos(phase), np.sin(phase)]).T
+                circle_pdf = PDF(x_bin_s, x_bin_f, pdf_size, y_bin_s, y_bin_f, pdf_size)
+                circle_pdf.update(circle_data)
+                circle_pdf.release()
+                circle_pdf.to_int()
+
                 self.images = np.zeros((num_subj, pdf_size, pdf_size, num_channels), dtype=np.uint8)
 
                 for point_id in tqdm(range(0, num_subj), mininterval=10.0, desc='raw dataset processing'):
@@ -106,21 +135,6 @@ class FloqLindDataset(Dataset):
                     evals_pdf.update(evals_data)
                     evals_pdf.release()
                     evals_pdf.to_int()
-
-                    cross_x = np.vstack([evals_pdf.x_bin_centers, np.zeros(len(evals_pdf.x_bin_centers), dtype=np.float64)]).T
-                    cross_y = np.vstack([np.zeros(len(evals_pdf.y_bin_centers), dtype=np.float64), evals_pdf.y_bin_centers]).T
-                    cross_data = np.concatenate((cross_x, cross_y), axis=0)
-                    cross_pdf = PDF(x_bin_s, x_bin_f, pdf_size, y_bin_s, y_bin_f, pdf_size)
-                    cross_pdf.update(cross_data)
-                    cross_pdf.release()
-                    cross_pdf.to_int()
-
-                    phase = np.linspace(0.0, 2.0 * np.pi, 1000)
-                    circle_data = np.vstack([np.cos(phase), np.sin(phase)]).T
-                    circle_pdf = PDF(x_bin_s, x_bin_f, pdf_size, y_bin_s, y_bin_f, pdf_size)
-                    circle_pdf.update(circle_data)
-                    circle_pdf.release()
-                    circle_pdf.to_int()
 
                     for row_id in range(0, pdf_size):
                         for col_id in range(0, pdf_size):

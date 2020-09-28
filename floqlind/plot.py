@@ -16,12 +16,14 @@ if __name__ == '__main__':
         size = 4
     else:
         raise ValueError('unsupported test system')
+
     input_size = 224
 
     path = get_path() + f'/dl/datasets/floquet_lindbladian/{system}'
 
     num_points = 200
     suffix = f'ampl(0.5000_0.5000_{num_points})_freq(0.0500_0.0500_{num_points})_phase(0.0000_0.0000_0)'
+    #suffix = f'ampl(0.0200_0.0200_{num_points})_freq(0.0350_0.0350_{num_points})_phase(0.0000_0.0000_0)'
 
     feature_type = 'eval'
     transforms_type = 'noNorm'
@@ -50,6 +52,7 @@ if __name__ == '__main__':
         os.makedirs(fig_path)
 
     target_indexes = [(10, 160), (4, 80), (42, 124), (190, 190)]
+    #target_indexes = [(50, 50), (190, 10), (10, 190), (190, 190)]
     for point in target_indexes:
         x = point[0] - 1
         y = point[1] - 1

@@ -2,29 +2,29 @@ clear all;
 addpath('E:/Work/os_lnd/source/matlab/lib')
 
 system_train = 'two_spins';
-system_test = 'two_spins';
+system_test = 'ospm';
 
 path_train = sprintf('E:/YandexDisk/Work/dl/datasets/floquet_lindbladian/%s', system_train);
 path_test = sprintf('E:/YandexDisk/Work/dl/datasets/floquet_lindbladian/%s', system_test);
 
-model = 'resnet_log_ampl(0.5000_0.5000_200)_freq(0.0500_0.0500_200)_phase(0.0000_0.0000_0)';
-epochs = 200;
+model = 'resnet_eval_regular_log_ampl(0.5000_0.5000_200)_freq(0.0500_0.0500_200)_phase(0.0000_0.0000_0)';
+epochs = 100;
 
 figures_path = sprintf('%s/%s/test/%s/figures', path_train, model, system_test);
 mkdir(figures_path);
 
-ampl_begin = 0.5;
-ampl_shift = 0.5;
+ampl_begin = 0.25;
+ampl_shift = 0.25;
 ampl_num = 10;
 ampl_chunks = 20;
 ampl_stride = ampl_shift * ampl_num;
 
-freq_begin = 0.05;
-freq_shift = 0.05;
+freq_begin = 0.025;
+freq_shift = 0.025;
 freq_num = 10;
 freq_chunks = 20;
 freq_stride = freq_shift * freq_num;
-ph = pi/2;
+ph = 0;
 
 ampl_num_global = ampl_num * ampl_chunks;
 freq_num_global = freq_num * freq_chunks;
