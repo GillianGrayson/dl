@@ -21,10 +21,10 @@ if __name__ == '__main__':
     size = 16
 
     path_train = get_path() + f'/dl/datasets/floquet_lindbladian/{system_train}'
-    suffix_train = 'ampl(0.5000_0.5000_200)_freq(0.0500_0.0500_200)_phase(0.0000_0.0000_0)'
+    suffix_train = 'ampl(0.5000_2.0000_50)_freq(0.0500_0.2000_50)_phase(0.0000_0.0000_0)'
 
-    feature_type = 'eval'
-    transforms_type = 'noNorm'
+    feature_type = 'prop'
+    transforms_type = 'regular'
     label_type = 'log'
 
     # Models to choose from [resnet, vgg, densenet, inception, resnet50_2D]
@@ -37,14 +37,14 @@ if __name__ == '__main__':
     feature_extract = False
 
     batch_size = 32
-    num_epochs = 100
+    num_epochs = 200
 
     is_continue = True
 
     model, input_size = initialize_model(model_name, num_classes, feature_extract, use_pretrained=True)
     # Send the model to GPU
     model = model.to(device)
-    #optimizer= optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+    # optimizer= optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
     optimizer = optim.Adam(model.parameters(), lr=0.005)
 
     train_loss_history = []
