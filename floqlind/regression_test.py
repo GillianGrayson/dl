@@ -38,7 +38,7 @@ if __name__ == '__main__':
     transforms_type = 'regular'
     label_type = 'log'
 
-    model_dir = f'{path_train}/{model_name}_{feature_type}_{transforms_type}_{label_type}_{suffix_train}'
+    model_dir = f'{path_train}/regression/{model_name}_{feature_type}_{transforms_type}_{label_type}_{suffix_train}'
 
     num_classes = 1
     feature_extract = False

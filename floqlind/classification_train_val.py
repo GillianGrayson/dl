@@ -6,7 +6,7 @@ from floqlind.routines.dataset import FloqLindDataset
 import torch.optim as optim
 import torch
 import torch.nn as nn
-from floqlind.routines.train import train_regression_model
+from floqlind.routines.train import train_classification_model
 from floqlind.routines.infrastructure import get_path
 import numpy as np
 import os
@@ -21,23 +21,23 @@ if __name__ == '__main__':
     size = 16
 
     path_train = get_path() + f'/dl/datasets/floquet_lindbladian/{system_train}'
-    suffix_train = 'ampl(0.5000_2.0000_50)_freq(0.0500_0.2000_50)_phase(0.0000_0.0000_0)'
+    suffix_train = 'ampl(0.5000_0.5000_200)_freq(0.0500_0.0500_200)_phase(0.0000_0.0000_0)'
 
     feature_type = 'prop'
     transforms_type = 'regular'
-    label_type = 'log'
+    label_type = 'class'
 
     # Models to choose from [resnet, vgg, densenet, inception, resnet50_2D]
     model_name = "resnet"
-    model_dir = f'{path_train}/{model_name}_{feature_type}_{transforms_type}_{label_type}_{suffix_train}'
+    model_dir = f'{path_train}/classification/{model_name}_{feature_type}_{transforms_type}_{label_type}_{suffix_train}'
     if not os.path.exists(model_dir):
         os.makedirs(model_dir)
 
-    num_classes = 1
+    num_classes = 2
     feature_extract = False
 
     batch_size = 32
-    num_epochs = 200
+    num_epochs = 30
 
     is_continue = True
 
@@ -48,9 +48,11 @@ if __name__ == '__main__':
     optimizer = optim.Adam(model.parameters(), lr=0.005)
 
     train_loss_history = []
+    train_acc_history = []
     val_loss_history = []
+    val_acc_history = []
     epoch_last = 0
-    best_loss = np.inf
+    best_acc = 0
     if is_continue:
         epoches = []
         for file in os.listdir(model_dir):
@@ -64,8 +66,10 @@ if __name__ == '__main__':
             model.load_state_dict(checkpoint['model_state_dict'])
             optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
             train_loss_history = checkpoint['train_loss']
+            train_acc_history = checkpoint['train_acc']
             val_loss_history = checkpoint['val_loss']
-            best_loss = checkpoint['best_loss']
+            val_acc_history = checkpoint['val_acc']
+            best_acc = checkpoint['best_acc']
     print(model)
 
     # define transforms
@@ -95,17 +99,19 @@ if __name__ == '__main__':
 
     params_to_learn(model, feature_extract)
 
-    criterion = nn.MSELoss()
+    criterion = nn.CrossEntropyLoss()
 
-    model, best_loss_curr, train_loss_history_curr, val_loss_history_curr = train_regression_model(device,
-                                                                                                   model,
-                                                                                                   dataloaders_dict,
-                                                                                                   criterion,
-                                                                                                   optimizer,
-                                                                                                   best_loss,
-                                                                                                   num_epochs=num_epochs,
-                                                                                                   is_inception=(model_name == "inception")
-                                                                                                   )
+    model, bets_acc, train_loss_history_curr, train_acc_history_curr, val_loss_history_curr, val_acc_history_curr = train_classification_model(
+        device,
+        model,
+        dataloaders_dict,
+        criterion,
+        optimizer,
+        best_acc,
+        num_epochs=num_epochs,
+        is_inception=(model_name == "inception")
+        )
+
     train_loss_history += train_loss_history_curr
     val_loss_history += val_loss_history_curr
 
@@ -114,9 +120,13 @@ if __name__ == '__main__':
         'model_state_dict': model.state_dict(),
         'optimizer_state_dict': optimizer.state_dict(),
         'train_loss': train_loss_history,
+        'train_acc': train_acc_history,
         'val_loss': val_loss_history,
-        'best_loss': best_loss_curr
+        'val_acc': val_acc_history,
+        'best_acc': best_acc
     }, f'{model_dir}/checkpoint_{num_epochs + epoch_last}.pth')
 
     np.savetxt(f'{model_dir}/train_loss_{num_epochs + epoch_last}.txt', np.asarray(train_loss_history), fmt='%0.16e')
+    np.savetxt(f'{model_dir}/train_acc_{num_epochs + epoch_last}.txt', np.asarray(train_acc_history), fmt='%0.16e')
     np.savetxt(f'{model_dir}/val_loss_{num_epochs + epoch_last}.txt', np.asarray(val_loss_history), fmt='%0.16e')
+    np.savetxt(f'{model_dir}/val_acc_{num_epochs + epoch_last}.txt', np.asarray(val_acc_history), fmt='%0.16e')
