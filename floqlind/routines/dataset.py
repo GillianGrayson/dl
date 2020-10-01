@@ -12,9 +12,19 @@ def norm_processing(norms, label_type):
         norms = np.log10(norms + min_norm)
     elif label_type == 'log_with_add':
         norms = np.log10(norms + 1e-16)
+    elif label_type == 'class':
+        tmp = np.zeros(len(norms), dtype=np.int)
+        num_zeros = 0
+        for x_id, x in enumerate(norms):
+            if x > 0:
+                tmp[x_id] = 1
+            else:
+                tmp[x_id] = 0
+                num_zeros += 1
+        norms = tmp
     return norms
 
-def loda_features(size, num_subj, path, suffix):
+def load_features(size, num_subj, path, suffix):
 
     fn_txt = f'{path}/props_dl_{suffix}.txt'
     fn_npz = f'{path}/props_dl_3d_{suffix}.npz'
@@ -54,7 +64,7 @@ class FloqLindDataset(Dataset):
 
         num_subj = self.norms.shape[0]
 
-        data = loda_features(size, num_subj, path, suffix)
+        data = load_features(size, num_subj, path, suffix)
 
 
         fn_npz = f'{path}/images_{features_type}_{suffix}.npz'

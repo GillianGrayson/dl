@@ -6,7 +6,7 @@ from floqlind.routines.dataset import FloqLindDataset
 import torch.optim as optim
 import torch
 import torch.nn as nn
-from floqlind.routines.train import train_model
+from floqlind.routines.train import train_regression_model
 from floqlind.routines.infrastructure import get_path
 import numpy as np
 import os
@@ -97,15 +97,15 @@ if __name__ == '__main__':
 
     criterion = nn.MSELoss()
 
-    model, best_loss_curr, train_loss_history_curr, val_loss_history_curr = train_model(device,
-                                                                                        model,
-                                                                                        dataloaders_dict,
-                                                                                        criterion,
-                                                                                        optimizer,
-                                                                                        best_loss,
-                                                                                        num_epochs=num_epochs,
-                                                                                        is_inception=(model_name == "inception")
-                                                                                        )
+    model, best_loss_curr, train_loss_history_curr, val_loss_history_curr = train_regression_model(device,
+                                                                                                   model,
+                                                                                                   dataloaders_dict,
+                                                                                                   criterion,
+                                                                                                   optimizer,
+                                                                                                   best_loss,
+                                                                                                   num_epochs=num_epochs,
+                                                                                                   is_inception=(model_name == "inception")
+                                                                                                   )
     train_loss_history += train_loss_history_curr
     val_loss_history += val_loss_history_curr
 
