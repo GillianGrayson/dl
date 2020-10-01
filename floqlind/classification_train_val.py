@@ -21,7 +21,7 @@ if __name__ == '__main__':
     size = 16
 
     path_train = get_path() + f'/dl/datasets/floquet_lindbladian/{system_train}'
-    suffix_train = 'ampl(0.5000_0.5000_200)_freq(0.0500_0.0500_200)_phase(0.0000_0.0000_0)'
+    suffix_train = 'ampl(0.5000_2.0000_50)_freq(0.0500_0.2000_50)_phase(0.0000_0.0000_0)'
 
     feature_type = 'prop'
     transforms_type = 'regular'
@@ -37,7 +37,7 @@ if __name__ == '__main__':
     feature_extract = False
 
     batch_size = 32
-    num_epochs = 30
+    num_epochs = 100
 
     is_continue = True
 
@@ -113,7 +113,9 @@ if __name__ == '__main__':
         )
 
     train_loss_history += train_loss_history_curr
+    train_acc_history += train_acc_history_curr
     val_loss_history += val_loss_history_curr
+    val_acc_history += val_acc_history_curr
 
     torch.save({
         'epoch': num_epochs + epoch_last,
