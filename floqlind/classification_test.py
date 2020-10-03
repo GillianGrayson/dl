@@ -29,7 +29,7 @@ if __name__ == '__main__':
     path_test = get_path() + f'/dl/datasets/floquet_lindbladian/{system_test}'
 
     suffix_train = 'ampl(0.5000_2.0000_50)_freq(0.0500_0.2000_50)_phase(0.0000_0.0000_0)'
-    suffix_test = 'ampl(0.0100_0.2000_500)_freq(0.0010_0.0400_500)_phase(0.0000_0.0000_0)'
+    suffix_test = 'ampl(0.2000_0.2000_500)_freq(0.0200_0.0200_500)_phase(0.0000_0.0000_0)'
 
     # Models to choose from [resnet, resnet50_2D, alexnet, vgg, squeezenet, densenet, inception]
     model_name = "resnet"

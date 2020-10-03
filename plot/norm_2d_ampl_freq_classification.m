@@ -15,14 +15,14 @@ epochs = 100;
 figures_path = sprintf('%s/%s/%s/test/%s/figures', path_train, task, model, system_test);
 mkdir(figures_path);
 
-ampl_begin = 0.01;
+ampl_begin = 0.2;
 ampl_shift = 0.2;
 ampl_num = 10;
 ampl_chunks = 50;
 ampl_stride = ampl_shift * ampl_num;
 
-freq_begin = 0.001;
-freq_shift = 0.04;
+freq_begin = 0.02;
+freq_shift = 0.02;
 freq_num = 10;
 freq_chunks = 50;
 freq_stride = freq_shift * freq_num;
