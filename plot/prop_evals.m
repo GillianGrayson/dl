@@ -1,29 +1,29 @@
 clear all;
 addpath('E:/Work/os_lnd/source/matlab/lib')
 
-system = 'os';
-N = 2;
+system = 'two_spins';
+N = 4;
 N2 = N * N;
 N4 = N2 * N2;
 
-from = 1e-16;
-to = 1e-4;
+from = 0;
+to = 0.1;
 
 path = sprintf('E:/YandexDisk/Work/dl/datasets/floquet_lindbladian/%s', system);
 
 figures_path = sprintf('%s/figures/props_evals', path);
 mkdir(figures_path);
 
-ampl_begin = 0.02;
-ampl_shift = 0.02;
+ampl_begin = 0.2;
+ampl_shift = 0.2;
 ampl_num = 10;
-ampl_chunks = 20;
+ampl_chunks = 50;
 ampl_stride = ampl_shift * ampl_num;
 
-freq_begin = 0.035;
-freq_shift = 0.035;
+freq_begin = 0.02;
+freq_shift = 0.02;
 freq_num = 10;
-freq_chunks = 20;
+freq_chunks = 50;
 freq_stride = freq_shift * freq_num;
 ph = 0;
 
@@ -65,6 +65,7 @@ pdf2d.y_bin_f = 1.05;
 
 pdf2d = oqs_pdf_2d_setup(pdf2d);
 
+count = 0;
 for ampl_id = 1:ampl_num_global
     for freq_id = 1:freq_num_global
         
@@ -73,6 +74,8 @@ for ampl_id = 1:ampl_num_global
         norm = norm_dl_1(index);
         
         if (norm >= from) && (norm < to)
+            
+            count = count + 1;
         
             prop_vec = props_dl((index - 1) * N4 + 1: index * N4, 1) + 1i * props_dl((index - 1) * N4 + 1: index * N4, 2);
             prop_mtx = zeros(N2);
@@ -84,7 +87,7 @@ for ampl_id = 1:ampl_num_global
 
             evals = eig(prop_mtx);
             [max_val, max_id] = max(real(evals));
-            if abs(max_val - 1.0) > 1e-13
+            if abs(max_val - 1.0) > 1e-11
                 fprintf('ampl_id: %d \t freq_id: %d\n', ampl_id, freq_id);
             end
             evals(max_id) = []; 
@@ -95,6 +98,8 @@ for ampl_id = 1:ampl_num_global
         end
     end
 end
+
+fprintf('count: %d\n', count);
 
 pdf2d = oqs_pdf_2d_release(pdf2d);
 
@@ -109,7 +114,7 @@ ylabel(pdf2d.y_label, 'Interpreter', 'latex');
 colormap hot;
 h = colorbar;
 set(gca, 'FontSize', 30);
-title(h, '$PDF$', 'FontSize', 33, 'interpreter','latex');
+title(h, '$\log_{10}PDF$', 'FontSize', 33, 'interpreter','latex');
 set(gca,'YDir','normal');
 hold all;
 
