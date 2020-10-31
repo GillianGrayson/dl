@@ -6,6 +6,7 @@ import torch.optim as optim
 import numpy as np
 import torchvision
 from torchvision import datasets, models, transforms
+import collections
 import matplotlib.pyplot as plt
 import time
 import os
@@ -47,6 +48,15 @@ def initialize_model(model_name, num_classes, feature_extract, use_pretrained=Tr
         """ Resnet18
         """
         model_ft = models.resnet18(pretrained=use_pretrained)
+        set_parameter_requires_grad(model_ft, feature_extract)
+        num_ftrs = model_ft.fc.in_features
+        model_ft.fc = nn.Linear(num_ftrs, num_classes)
+        input_size = 224
+
+    if model_name == "resnet50":
+        """ Resnet50
+        """
+        model_ft = models.resnet50(pretrained=use_pretrained)
         set_parameter_requires_grad(model_ft, feature_extract)
         num_ftrs = model_ft.fc.in_features
         model_ft.fc = nn.Linear(num_ftrs, num_classes)
@@ -117,3 +127,46 @@ def initialize_model(model_name, num_classes, feature_extract, use_pretrained=Tr
         exit()
 
     return model_ft, input_size
+
+
+def build_model(arch, num_classes, use_pretrained, feature_extract):
+    """
+    Load a pretrained model with only the final layer
+    replaced by a user-defined classifier
+    :param arch - a string specifying the type of model architecture
+    :param num_classes - an integer specifying the number of class labels
+    """
+    in_features = 0
+    try:
+        # model = eval("models." + arch + "(pretrained=True)")
+        model = models.__dict__[arch](pretrained=use_pretrained)
+        set_parameter_requires_grad(model, feature_extract)
+    except:
+        raise Exception('Invalid architecture specified')
+
+    # extract the last layer in the model
+    last_layer = list(model.children())[-1]
+    if isinstance(last_layer, nn.Sequential):
+        count = 0
+        for layer in last_layer:
+            if isinstance(layer, nn.Linear):
+                # fetch the first of the many Linear layers
+                count += 1
+                in_features = layer.in_features
+            if count == 1:
+                break
+    elif isinstance(last_layer, nn.Linear):
+        in_features = last_layer.in_features
+    # define the new classifier
+    classifier = nn.Sequential(collections.OrderedDict([
+        ('bc1', nn.BatchNorm1d(in_features)),
+        ('relu1', nn.ReLU()),
+        ('fc1', nn.Linear(in_features, num_classes, bias=True)),
+    ]))
+    # replace the existing classifier in thelast layer with the new one
+    if model.__dict__['_modules'].get('fc', None):
+        model.fc = classifier
+    else:
+        model.classifier = classifier
+
+    return model, 224

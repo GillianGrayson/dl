@@ -26,7 +26,7 @@ if __name__ == '__main__':
     #suffix = f'ampl(0.0200_0.0200_{num_points})_freq(0.0350_0.0350_{num_points})_phase(0.0000_0.0000_0)'
 
     feature_type = 'eval'
-    transforms_type = 'noNorm'
+    transforms_type = 'regular'
     label_type = 'log'
 
     if transforms_type == 'regular':

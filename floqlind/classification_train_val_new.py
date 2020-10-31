@@ -1,7 +1,7 @@
 from torchvision.transforms import transforms
 from torch.utils.data import DataLoader
 from floqlind.routines.routines import get_device, train_val_dataset
-from floqlind.routines.model import initialize_model, params_to_learn
+from floqlind.routines.model import build_model, params_to_learn
 from floqlind.routines.dataset import FloqLindDataset
 import torch.optim as optim
 import torch
@@ -28,7 +28,7 @@ if __name__ == '__main__':
     label_type = 'class'
 
     # Models to choose from [resnet, vgg, densenet, inception, resnet50_2D]
-    model_name = "resnet50"
+    model_name = "resnet152"
     use_pretrained = False
 
     if use_pretrained:
@@ -47,7 +47,7 @@ if __name__ == '__main__':
 
     is_continue = True
 
-    model, input_size = initialize_model(model_name, num_classes, feature_extract, use_pretrained=use_pretrained)
+    model, input_size = build_model(model_name, num_classes, use_pretrained, feature_extract)
     # Send the model to GPU
     model = model.to(device)
     # optimizer= optim.SGD(model.parameters(), lr=0.001, momentum=0.9)

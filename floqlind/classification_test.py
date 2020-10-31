@@ -33,12 +33,16 @@ if __name__ == '__main__':
 
     # Models to choose from [resnet, resnet50_2D, alexnet, vgg, squeezenet, densenet, inception]
     model_name = "resnet"
+    use_pretrained = False
 
     feature_type = 'prop'
     transforms_type = 'regular'
     label_type = 'class'
 
-    model_dir = f'{path_train}/classification/{model_name}_{feature_type}_{transforms_type}_{label_type}_{suffix_train}'
+    if use_pretrained:
+        model_dir = f'{path_train}/classification/{model_name}_{feature_type}_{transforms_type}_{label_type}_{suffix_train}'
+    else:
+        model_dir = f'{path_train}/classification/{model_name}_scratch_{feature_type}_{transforms_type}_{label_type}_{suffix_train}'
 
     num_classes = 2
     feature_extract = False
