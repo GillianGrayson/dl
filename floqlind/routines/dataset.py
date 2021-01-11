@@ -4,7 +4,87 @@ from torch.utils.data import Dataset
 from tqdm import tqdm
 from numpy import linalg as LA
 from floqlind.routines.pdf import PDF
+import math
+import pandas as pd
 
+
+def load_df_data(path, size, suffix, label_type):
+    fn_prop = f'{path}/arrays/prop_df_{suffix}.pkl'
+    fn_eval = f'{path}/arrays/eval_df_{suffix}.pkl'
+    fn_reshuffle_eval = f'{path}/arrays/reshuffle_eval_df_{suffix}.pkl'
+
+    if os.path.isfile(fn_prop):
+        prop_df = pd.read_pickle(fn_prop)
+        eval_df = pd.read_pickle(fn_eval)
+        reshuffle_eval_df = pd.read_pickle(fn_reshuffle_eval)
+    else:
+        N = math.isqrt(size)
+
+        labels = np.loadtxt(f'{path}/norm_dl_1_{suffix}.txt')
+        labels = labels.astype(np.float32)
+        labels = norm_processing(labels, label_type)
+
+        num_subj = labels.shape[0]
+
+        data = load_features(size, num_subj, path, suffix)
+
+        prop_dict = {'label': labels}
+        eval_dict = {'label': labels}
+        reshuffle_eval_dict = {'label': labels}
+        for row_id in range(0, size):
+            name_re = f'p_{row_id}_re'
+            name_im = f'p_{row_id}_im'
+            eval_dict[name_re] = np.zeros(num_subj, dtype=np.float64)
+            eval_dict[name_im] = np.zeros(num_subj, dtype=np.float64)
+            reshuffle_eval_dict[name_re] = np.zeros(num_subj, dtype=np.float64)
+            for col_id in range(0, size):
+                name_re = f'p_{row_id}_{col_id}_re'
+                name_im = f'p_{row_id}_{col_id}_im'
+                prop_dict[name_re] = np.zeros(num_subj, dtype=np.float64)
+                prop_dict[name_im] = np.zeros(num_subj, dtype=np.float64)
+
+        propagators = np.zeros((num_subj, size, size), dtype=np.complex128)
+        reshuffle_p = np.zeros((num_subj, size, size), dtype=np.complex128)
+
+        for p_id in tqdm(range(0, num_subj), mininterval=10.0, desc='raw dataset processing'):
+            start_id = p_id * size * size
+            for row_id in range(0, size):
+                for col_id in range(0, size):
+                    global_id = start_id + row_id * size + col_id
+                    propagators[p_id][row_id][col_id] = np.complex(data[global_id][0], data[global_id][1])
+                    name_re = f'p_{row_id}_{col_id}_re'
+                    name_im = f'p_{row_id}_{col_id}_im'
+                    prop_dict[name_re][p_id] = data[global_id][0]
+                    prop_dict[name_im][p_id] = data[global_id][1]
+
+            for i in range(0, N):
+                for j in range(0, N):
+                    for k in range(0, N):
+                        for m in range(0, N):
+                            origin_row = i * N + k
+                            origin_col = j * N + m
+                            gamma_row = i * N + j
+                            gamma_col = k * N + m
+                            reshuffle_p[p_id][gamma_row][gamma_col] = propagators[p_id][origin_row][origin_col]
+
+            evals = np.sort(np.linalg.eigvals(propagators[p_id]))
+            reshuffle_evals = np.sort(np.linalg.eigvals(reshuffle_p[p_id]))
+            for row_id in range(0, size):
+                name_re = f'p_{row_id}_re'
+                name_im = f'p_{row_id}_im'
+                eval_dict[name_re][p_id] = np.real(evals[row_id])
+                eval_dict[name_im][p_id] = np.imag(evals[row_id])
+                reshuffle_eval_dict[name_re][p_id] = np.real(reshuffle_evals[row_id])
+
+        prop_df = pd.DataFrame(prop_dict)
+        eval_df = pd.DataFrame(eval_dict)
+        reshuffle_eval_df = pd.DataFrame(reshuffle_eval_dict)
+
+        pd.to_pickle(prop_df, fn_prop)
+        pd.to_pickle(eval_df, fn_eval)
+        pd.to_pickle(reshuffle_eval_df, fn_reshuffle_eval)
+
+    return prop_df, eval_df, reshuffle_eval_df
 
 def norm_processing(norms, label_type):
     if label_type == 'log':

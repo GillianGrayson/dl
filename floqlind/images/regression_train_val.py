@@ -1,12 +1,12 @@
 from torchvision.transforms import transforms
 from torch.utils.data import DataLoader
 from floqlind.routines.routines import get_device, train_val_dataset
-from floqlind.routines.model import build_model, params_to_learn
+from floqlind.routines.model import build_model_base, params_to_learn
 from floqlind.routines.dataset import FloqLindDataset
 import torch.optim as optim
 import torch
 import torch.nn as nn
-from floqlind.routines.train import train_classification_model
+from floqlind.routines.train import train_regression_model
 from floqlind.routines.infrastructure import get_path
 import numpy as np
 import os
@@ -25,40 +25,32 @@ if __name__ == '__main__':
 
     feature_type = 'prop'
     transforms_type = 'regular'
-    label_type = 'class'
+    label_type = 'log'
 
     # Models to choose from [resnet, vgg, densenet, inception, resnet50_2D]
-    model_name = "resnet152"
-    use_pretrained = False
-
-    if use_pretrained:
-        model_dir = f'{path_train}/classification/{model_name}_{feature_type}_{transforms_type}_{label_type}_{suffix_train}'
-    else:
-        model_dir = f'{path_train}/classification/{model_name}_scratch_{feature_type}_{transforms_type}_{label_type}_{suffix_train}'
-
+    model_name = "resnet"
+    model_dir = f'{path_train}/regression/{model_name}_{feature_type}_{transforms_type}_{label_type}_{suffix_train}'
     if not os.path.exists(model_dir):
         os.makedirs(model_dir)
 
-    num_classes = 2
+    num_classes = 1
     feature_extract = False
 
-    batch_size = 16
-    num_epochs = 100
+    batch_size = 32
+    num_epochs = 200
 
     is_continue = True
 
-    model, input_size = build_model(model_name, num_classes, use_pretrained, feature_extract)
+    model, input_size = build_model_base(model_name, num_classes, feature_extract, use_pretrained=True)
     # Send the model to GPU
     model = model.to(device)
     # optimizer= optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
     optimizer = optim.Adam(model.parameters(), lr=0.005)
 
     train_loss_history = []
-    train_acc_history = []
     val_loss_history = []
-    val_acc_history = []
     epoch_last = 0
-    best_acc = 0
+    best_loss = np.inf
     if is_continue:
         epoches = []
         for file in os.listdir(model_dir):
@@ -72,10 +64,8 @@ if __name__ == '__main__':
             model.load_state_dict(checkpoint['model_state_dict'])
             optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
             train_loss_history = checkpoint['train_loss']
-            train_acc_history = checkpoint['train_acc']
             val_loss_history = checkpoint['val_loss']
-            val_acc_history = checkpoint['val_acc']
-            best_acc = checkpoint['best_acc']
+            best_loss = checkpoint['best_loss']
     print(model)
 
     # define transforms
@@ -105,36 +95,28 @@ if __name__ == '__main__':
 
     params_to_learn(model, feature_extract)
 
-    criterion = nn.CrossEntropyLoss()
+    criterion = nn.MSELoss()
 
-    model, bets_acc, train_loss_history_curr, train_acc_history_curr, val_loss_history_curr, val_acc_history_curr = train_classification_model(
-        device,
-        model,
-        dataloaders_dict,
-        criterion,
-        optimizer,
-        best_acc,
-        num_epochs=num_epochs,
-        is_inception=(model_name == "inception")
-        )
-
+    model, best_loss_curr, train_loss_history_curr, val_loss_history_curr = train_regression_model(device,
+                                                                                                   model,
+                                                                                                   dataloaders_dict,
+                                                                                                   criterion,
+                                                                                                   optimizer,
+                                                                                                   best_loss,
+                                                                                                   num_epochs=num_epochs,
+                                                                                                   is_inception=(model_name == "inception")
+                                                                                                   )
     train_loss_history += train_loss_history_curr
-    train_acc_history += train_acc_history_curr
     val_loss_history += val_loss_history_curr
-    val_acc_history += val_acc_history_curr
 
     torch.save({
         'epoch': num_epochs + epoch_last,
         'model_state_dict': model.state_dict(),
         'optimizer_state_dict': optimizer.state_dict(),
         'train_loss': train_loss_history,
-        'train_acc': train_acc_history,
         'val_loss': val_loss_history,
-        'val_acc': val_acc_history,
-        'best_acc': best_acc
+        'best_loss': best_loss_curr
     }, f'{model_dir}/checkpoint_{num_epochs + epoch_last}.pth')
 
     np.savetxt(f'{model_dir}/train_loss_{num_epochs + epoch_last}.txt', np.asarray(train_loss_history), fmt='%0.16e')
-    np.savetxt(f'{model_dir}/train_acc_{num_epochs + epoch_last}.txt', np.asarray(train_acc_history), fmt='%0.16e')
     np.savetxt(f'{model_dir}/val_loss_{num_epochs + epoch_last}.txt', np.asarray(val_loss_history), fmt='%0.16e')
-    np.savetxt(f'{model_dir}/val_acc_{num_epochs + epoch_last}.txt', np.asarray(val_acc_history), fmt='%0.16e')

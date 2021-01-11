@@ -38,7 +38,7 @@ def params_to_learn(model, feature_extract):
                 print("\t", name)
 
 
-def initialize_model(model_name, num_classes, feature_extract, use_pretrained=True):
+def build_model_base(model_name, num_classes, feature_extract, use_pretrained=True):
     # Initialize these variables which will be set in this if statement. Each of these
     #  variables is model specific.
     model_ft = None
@@ -129,7 +129,7 @@ def initialize_model(model_name, num_classes, feature_extract, use_pretrained=Tr
     return model_ft, input_size
 
 
-def build_model(arch, num_classes, use_pretrained, feature_extract):
+def build_model_advance(arch, num_classes, feature_extract, use_pretrained,):
     """
     Load a pretrained model with only the final layer
     replaced by a user-defined classifier
