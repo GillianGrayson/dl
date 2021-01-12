@@ -6,17 +6,33 @@ from numpy import linalg as LA
 from floqlind.routines.pdf import PDF
 import math
 import pandas as pd
+from sklearn.preprocessing import StandardScaler
+import pickle
 
 
-def load_df_data(path, size, suffix, label_type):
-    fn_prop = f'{path}/arrays/prop_df_{suffix}.pkl'
-    fn_eval = f'{path}/arrays/eval_df_{suffix}.pkl'
-    fn_reshuffle_eval = f'{path}/arrays/reshuffle_eval_df_{suffix}.pkl'
+def load_df_data(path, size, suffix, label_type, norm=True):
+    fn_prop = f'{path}/arrays/prop_df_{suffix}_norm{norm:d}.pkl'
+    fn_eval = f'{path}/arrays/eval_df_{suffix}_norm{norm:d}.pkl'
+    fn_reshuffle_eval = f'{path}/arrays/reshuffle_eval_df_{suffix}_norm{norm:d}.pkl'
+
+    fn_prop_scale = f'{path}/arrays/prop_df_{suffix}_norm{norm:d}_scale.pkl'
+    fn_eval_scale = f'{path}/arrays/eval_df_{suffix}_norm{norm:d}_scale.pkl'
+    fn_reshuffle_eval_scale = f'{path}/arrays/reshuffle_eval_df_{suffix}_norm{norm:d}_scale.pkl'
 
     if os.path.isfile(fn_prop):
         prop_df = pd.read_pickle(fn_prop)
         eval_df = pd.read_pickle(fn_eval)
         reshuffle_eval_df = pd.read_pickle(fn_reshuffle_eval)
+
+        with open(fn_prop_scale, 'rb') as file:
+            prop_scale = pickle.load(file)
+
+        with open(fn_eval_scale, 'rb') as file:
+            eval_scale = pickle.load(file)
+
+        with open(fn_reshuffle_eval_scale, 'rb') as file:
+            reshuffle_eval_scale = pickle.load(file)
+
     else:
         N = math.isqrt(size)
 
@@ -76,6 +92,39 @@ def load_df_data(path, size, suffix, label_type):
                 eval_dict[name_im][p_id] = np.imag(evals[row_id])
                 reshuffle_eval_dict[name_re][p_id] = np.real(reshuffle_evals[row_id])
 
+        prop_scale = {}
+        eval_scale = {}
+        reshuffle_eval_scale = {}
+
+        if norm:
+            for row_id in range(0, size):
+                name_re = f'p_{row_id}_re'
+                name_im = f'p_{row_id}_im'
+
+                eval_scale_re = StandardScaler()
+                eval_dict[name_re] = np.squeeze(eval_scale_re.fit_transform(eval_dict[name_re].reshape(-1, 1)))
+                eval_scale[name_re] = eval_scale_re
+
+                eval_scale_im = StandardScaler()
+                eval_dict[name_im] = np.squeeze(eval_scale_im.fit_transform(eval_dict[name_im].reshape(-1, 1)))
+                eval_scale[name_im] = eval_scale_im
+
+                reshuffle_eval_re = StandardScaler()
+                reshuffle_eval_dict[name_re] = np.squeeze(reshuffle_eval_re.fit_transform(reshuffle_eval_dict[name_re].reshape(-1, 1)))
+                reshuffle_eval_scale[name_re] = reshuffle_eval_re
+
+                for col_id in range(0, size):
+                    name_re = f'p_{row_id}_{col_id}_re'
+                    name_im = f'p_{row_id}_{col_id}_im'
+
+                    prop_scale_re = StandardScaler()
+                    prop_dict[name_re] = np.squeeze(prop_scale_re.fit_transform(prop_dict[name_re].reshape(-1, 1)))
+                    prop_scale[name_re] = prop_scale_re
+
+                    prop_scale_im = StandardScaler()
+                    prop_dict[name_im] = np.squeeze(prop_scale_im.fit_transform(prop_dict[name_im].reshape(-1, 1)))
+                    prop_scale[name_im] = prop_scale_im
+
         prop_df = pd.DataFrame(prop_dict)
         eval_df = pd.DataFrame(eval_dict)
         reshuffle_eval_df = pd.DataFrame(reshuffle_eval_dict)
@@ -84,7 +133,14 @@ def load_df_data(path, size, suffix, label_type):
         pd.to_pickle(eval_df, fn_eval)
         pd.to_pickle(reshuffle_eval_df, fn_reshuffle_eval)
 
-    return prop_df, eval_df, reshuffle_eval_df
+        with open(fn_prop_scale, 'wb') as handle:
+            pickle.dump(prop_scale, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        with open(fn_eval_scale, 'wb') as handle:
+            pickle.dump(eval_scale, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        with open(fn_reshuffle_eval_scale, 'wb') as handle:
+            pickle.dump(reshuffle_eval_scale, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    return prop_df, eval_df, reshuffle_eval_df, prop_scale, eval_scale, reshuffle_eval_scale
 
 def norm_processing(norms, label_type):
     if label_type == 'log':

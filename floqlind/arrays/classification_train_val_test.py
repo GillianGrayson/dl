@@ -3,6 +3,7 @@ from torch.utils.data import DataLoader
 from floqlind.routines.routines import get_device, train_val_dataset
 from floqlind.routines.model import build_model_base, build_model_advance, params_to_learn
 from floqlind.routines.dataset import load_df_data
+from floqlind.routines.classification import *
 import torch.optim as optim
 import torch
 import torch.nn as nn
@@ -25,6 +26,13 @@ if __name__ == '__main__':
 
     label_type = 'class'
 
-    prop_df, eval_df, reshuffle_eval_df = load_df_data(path_train, size, suffix_train, label_type)
+    prop_df, eval_df, reshuffle_eval_df, prop_scale, eval_scale, reshuffle_eval_scale = load_df_data(path_train, size, suffix_train, label_type, norm=True)
 
-    ololo = 1
+    models = specify_models()
+    best_models = auto_train_binary_classifier(reshuffle_eval_df, 'label', models)
+
+    models = specify_models()
+    best_models = auto_train_binary_classifier(eval_df, 'label', models)
+
+    models = specify_models()
+    best_models = auto_train_binary_classifier(prop_df, 'label', models)
