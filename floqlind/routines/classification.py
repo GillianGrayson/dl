@@ -146,3 +146,18 @@ def auto_train_binary_classifier(df, y_column, models, test_size = 0.2, random_s
 
     return final_models
 
+
+def test_binary_classifier(df, y_column, final_models):
+
+    X_test, y_test = extract_x_and_y(df, y_column)
+
+    for m_id in range(0, len(final_models)):
+        model_name = final_models[m_id][0]
+        predicted = final_models[m_id][1].predict(X_test)
+        test_set_score = sklearn.metrics.accuracy_score(y_test, predicted)
+        print(f'{model_name}')
+        print(f'test: {test_set_score}')
+        print(f'\n')
+
+    return final_models
+
