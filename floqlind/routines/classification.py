@@ -52,7 +52,7 @@ def specify_models():
 
     knear={'name':'K Nearest Neighbors Classifier',
            'class':sklearn.neighbors.KNeighborsClassifier(),
-            'parameters':{'n_neighbors':range(1,12)}
+            'parameters':{'n_neighbors':range(2,12)}
           }
 
     svc_linear={'name':'Support Vector Classifier with Linear Kernel',
@@ -100,9 +100,11 @@ def train_model(model_dict, X, y, metric = 'f1', k = 5):
     name=model_dict['name']
     param_grid = model_dict['parameters']
     clf=GridSearchCV(estimator=model_dict['class'], param_grid=param_grid, cv= k, scoring=metric)
-    best_score= clf.fit(X,y).best_score_
+    clf.fit(X, y)
+    best_score = clf.best_score_
+    best_params = clf.best_params_
     best_model= clf
-    return(name, best_model, best_score)
+    return(name, best_model, best_score, best_params)
 
 #########################################
 def train_all_models(models, X, y, metric ='accuracy', k = 5):
@@ -137,11 +139,13 @@ def auto_train_binary_classifier(df, y_column, models, test_size = 0.2, random_s
         model_name = final_models[m_id][0]
         model = final_models[m_id][1]
         train_set_score = final_models[m_id][2]
-        predicted = final_models[m_id][1].predict(X_test)
+        best_params = final_models[m_id][3]
+        predicted = model.predict(X_test)
         test_set_score = sklearn.metrics.accuracy_score(y_test, predicted)
         print(f'{model_name}')
         print(f'train: {train_set_score}')
         print(f'val: {test_set_score}')
+        print(f'model params: {best_params}')
         print(f'\n')
 
     return final_models
