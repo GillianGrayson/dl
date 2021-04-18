@@ -215,17 +215,17 @@ def scale_df_data(path, size, suffix, label_type, prop_scale, eval_scale, reshuf
             name_re = f'p_{row_id}_re'
             name_im = f'p_{row_id}_im'
 
-            eval_dict[name_re] = np.squeeze(eval_scale[name_re].fit_transform(eval_dict[name_re].reshape(-1, 1)))
-            eval_dict[name_im] = np.squeeze(eval_scale[name_im].fit_transform(eval_dict[name_im].reshape(-1, 1)))
+            eval_dict[name_re] = np.squeeze(eval_scale[name_re].transform(eval_dict[name_re].reshape(-1, 1)))
+            eval_dict[name_im] = np.squeeze(eval_scale[name_im].transform(eval_dict[name_im].reshape(-1, 1)))
 
-            reshuffle_eval_dict[name_re] = np.squeeze(reshuffle_eval_scale[name_re].fit_transform(reshuffle_eval_dict[name_re].reshape(-1, 1)))
+            reshuffle_eval_dict[name_re] = np.squeeze(reshuffle_eval_scale[name_re].transform(reshuffle_eval_dict[name_re].reshape(-1, 1)))
 
             for col_id in range(0, size):
                 name_re = f'p_{row_id}_{col_id}_re'
                 name_im = f'p_{row_id}_{col_id}_im'
 
-                prop_dict[name_re] = np.squeeze(prop_scale[name_re].fit_transform(prop_dict[name_re].reshape(-1, 1)))
-                prop_dict[name_im] = np.squeeze(prop_scale[name_im].fit_transform(prop_dict[name_im].reshape(-1, 1)))
+                prop_dict[name_re] = np.squeeze(prop_scale[name_re].transform(prop_dict[name_re].reshape(-1, 1)))
+                prop_dict[name_im] = np.squeeze(prop_scale[name_im].transform(prop_dict[name_im].reshape(-1, 1)))
 
         prop_df = pd.DataFrame(prop_dict)
         eval_df = pd.DataFrame(eval_dict)
