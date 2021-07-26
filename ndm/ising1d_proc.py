@@ -2,19 +2,25 @@ import netket as nk
 import numpy as np
 from numpy import linalg as la
 import pandas as pd
+import os
+
 
 # Model params
-model = 'ising'
+model = 'ising1d'
 L = 4
 gp = 0.3
 Vp = 2.0
 
+path = f"/media/sf_Work/dl/netket/{model}/L({L}_V({Vp})_g({gp}))"
+if not os.path.exists(f"{path}"):
+    os.makedirs(f"{path}")
+
 # Ansatz params
-beta = 2
-alpha = 2
+beta = 8
+alpha = 8
 n_samples = 2000
 n_samples_diag = 1000
-n_iter = 500
+n_iter = 1000
 
 # Create graph
 g = nk.graph.Hypercube(length=L, n_dim=1, pbc=False)
@@ -88,14 +94,12 @@ for it in range(n_iter):
     metrics_dict['norm_rho_diff_2'].append(la.norm(rho_diff_2))
 
 metrics_df = pd.DataFrame(metrics_dict)
-metrics_df.to_excel(f"metrics_alpha{alpha}_beta{beta}.xlsx", index=False)
+metrics_df.to_excel(f"{path}/metrics_alpha({alpha})_beta({beta}).xlsx", index=False)
 
-ss.reset()
-out = ss.run(n_iter=n_iter, out="test", obs=obs)
-rho_neural = np.array(ss.state.to_matrix())
-rho_diff_1 = rho_exact - rho_neural
-rho_diff_2 = rho_exact - rho_neural.conjugate()
-print(f"norm_rho_diff_1: {la.norm(rho_diff_1)}")
-print(f"norm_rho_diff_2: {la.norm(rho_diff_2)}")
-
-ololo = 1
+# ss.reset()
+# out = ss.run(n_iter=n_iter, out="test", obs=obs)
+# rho_neural = np.array(ss.state.to_matrix())
+# rho_diff_1 = rho_exact - rho_neural
+# rho_diff_2 = rho_exact - rho_neural.conjugate()
+# print(f"norm_rho_diff_1: {la.norm(rho_diff_1)}")
+# print(f"norm_rho_diff_2: {la.norm(rho_diff_2)}")
