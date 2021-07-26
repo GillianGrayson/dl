@@ -53,7 +53,7 @@ def build_model_base(model_name, num_classes, feature_extract, use_pretrained=Tr
         model_ft.fc = nn.Linear(num_ftrs, num_classes)
         input_size = 224
 
-    if model_name == "resnet50":
+    elif model_name == "resnet50":
         """ Resnet50
         """
         model_ft = models.resnet50(pretrained=use_pretrained)

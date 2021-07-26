@@ -28,7 +28,7 @@ if __name__ == '__main__':
     label_type = 'class'
 
     # Models to choose from [resnet, vgg, densenet, inception, resnet50_2D]
-    model_name = "resnet50"
+    model_name = "resnet"
     build_type = 'base'
     use_pretrained = False
 
@@ -46,7 +46,7 @@ if __name__ == '__main__':
     batch_size = 16
     num_epochs = 100
 
-    is_continue = True
+    is_continue = False
 
     if build_type == 'base':
         model, input_size = build_model_base(model_name, num_classes, feature_extract=feature_extract, use_pretrained=use_pretrained)
