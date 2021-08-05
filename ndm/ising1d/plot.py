@@ -1,7 +1,7 @@
 import pandas as pd
 import plotly.graph_objects as go
-from plot.routines.layout import add_layout
-from plot.routines.save import save_figure
+from ndm.plot.layout import add_layout
+from ndm.plot.save import save_figure
 
 
 # Model params
@@ -16,6 +16,7 @@ path = f"/media/sf_Work/dl/netket/{model}/L({L})_V({Vp})_g({gp})"
 
 params = [
     {"alpha": 2, "beta": 2},
+    {"alpha": 4, "beta": 4},
 ]
 
 fig_ldagl = go.Figure()
@@ -43,7 +44,7 @@ for p in params:
         )
     )
 
-add_layout(fig_ldagl, "Interations", r"L^\dagger L", f"Ising 1D  (L={L}, V={Vp}, g={gp})")
+add_layout(fig_ldagl, "Interations", r"$L^\dagger L$", f"Ising 1D  (L={L}, V={Vp}, g={gp})")
 fig_ldagl.update_layout({'colorway': ['red', 'blue', 'green', 'orange']})
 fig_ldagl.update_yaxes(type="log")
 save_figure(fig_ldagl, f"{path}/ldagl")

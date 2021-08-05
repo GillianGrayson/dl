@@ -16,10 +16,10 @@ if not os.path.exists(f"{path}"):
     os.makedirs(f"{path}")
 
 # Ansatz params
-beta = 4
-alpha = 4
-n_samples = 2000
-n_samples_diag = 2000
+beta = 6
+alpha = 6
+n_samples = 1000
+n_samples_diag = 1000
 n_iter = 500
 
 # Create graph
@@ -75,6 +75,8 @@ ss = nk.SteadyState(lind, op, variational_state=vs, preconditioner=sr)
 obs = {"Sx": obs_sx, "Sy": obs_sy, "Sz": obs_sz}
 
 rho_exact = nk.exact.steady_state(lind)
+#rho_exact = nk.exact.steady_state(lind_for_exact, method="iterative", sparse=True, tol=1e-10)
+
 metrics_dict = {
     'iteration': np.linspace(1, n_iter, n_iter),
     'ldagl_mean': [],

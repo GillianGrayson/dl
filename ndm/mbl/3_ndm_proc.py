@@ -9,7 +9,7 @@ from tqdm import tqdm
 # Model params
 model = 'mbl'
 N = 8
-seed = 1337
+seed = 1
 W = 20.0
 U = 1.0
 J = 1.0
@@ -19,9 +19,9 @@ gamma = 0.1
 # Ansatz params
 beta = 2
 alpha = 2
-n_samples = 2000
-n_samples_diag = 2000
-n_iter = 200
+n_samples = 5000
+n_samples_diag = 1000
+n_iter = 1000
 
 np.random.seed(seed)
 
@@ -79,7 +79,7 @@ vs.init_parameters(nk.nn.initializers.normal(stddev=0.01))
 ss = nk.SteadyState(lind, op, variational_state=vs, preconditioner=sr)
 
 metrics_dict = {
-    'iteration': np.linspace(1, n_iter+1, n_iter+1),
+    'iteration': np.linspace(1, n_iter, n_iter),
     'ldagl_mean': [],
     'ldagl_error_of_mean': [],
     'norm_rho_diff': [],
@@ -87,7 +87,8 @@ metrics_dict = {
 }
 
 # Calculate exact rho
-rho_exact = nk.exact.steady_state(lind, method="iterative", sparse=True, tol=1e-10)
+#rho_exact = nk.exact.steady_state(lind, method="iterative", sparse=True, tol=1e-10)
+rho_exact = nk.exact.steady_state(lind)
 
 for it in tqdm(range(n_iter)):
     out = ss.run(n_iter=1)
