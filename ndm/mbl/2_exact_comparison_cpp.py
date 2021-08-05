@@ -41,9 +41,6 @@ for row in content:
         print('Non-zero imag part in cpp Hamiltonian')
     ha_cpp[boson_id, j] = real
 
-# Hilbert space
-hi = Fock(n_max=1, n_particles=N//2, N=N)
-
 # The Hamiltonian
 ha = nk.operator.LocalOperator(hi)
 
@@ -100,7 +97,7 @@ lind_diff_conj = la.norm(lind_cpp - np.conjugate(lind_dense))
 print(f'lind_diff: {lind_diff}')
 print(f'lind_diff_conj: {lind_diff_conj}')
 
-rho_it = nk.exact.steady_state(lind, method="iterative", sparse=True, tol=1e-8)
+rho_it = nk.exact.steady_state(lind, method="iterative", sparse=True, tol=1e-10)
 
 with open(f"{cpp_path}/rho_mtx_ns({N})_seed({cpp_seed})_diss({dt}_0.0000_{gamma:0.4f})_prm({W:0.4f}_{U:0.4f}_{J:0.4f}).txt") as f:
     content = f.read().splitlines()
@@ -114,9 +111,9 @@ rho_cpp = rho_cpp.reshape((hi.n_states, hi.n_states))
 rho_diff = la.norm(rho_cpp - rho_it)
 rho_diff_conj = la.norm(rho_cpp - np.conjugate(rho_it))
 print(f'rho_diff: {rho_diff}')
-print(f'lind_diff_conj: {rho_diff_conj}')
+print(f'rho_diff_conj: {rho_diff_conj}')
 
-rho_ed = nk.exact.steady_state(lind)
+#rho_ed = nk.exact.steady_state(lind)
 
-ololo = 1
+#ololo = 1
 

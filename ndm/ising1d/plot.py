@@ -6,19 +6,16 @@ from plot.routines.save import save_figure
 
 # Model params
 model = 'ising1d'
-L = 4
+L = 6
 gp = 0.3
 Vp = 2.0
 
-path = f"/media/sf_Work/dl/netket/{model}/L({L}_V({Vp})_g({gp}))"
+path = f"/media/sf_Work/dl/netket/{model}/L({L})_V({Vp})_g({gp})"
 
 # Ansatz params
 
 params = [
-    {"alpha": 1, "beta": 1},
     {"alpha": 2, "beta": 2},
-    {"alpha": 4, "beta": 4},
-    {"alpha": 8, "beta": 8}
 ]
 
 fig_ldagl = go.Figure()
@@ -46,7 +43,7 @@ for p in params:
         )
     )
 
-add_layout(fig_ldagl, "Interations", "LdagL", f"Ising 1D  (L={L}, V={Vp}, g={gp})")
+add_layout(fig_ldagl, "Interations", r"L^\dagger L", f"Ising 1D  (L={L}, V={Vp}, g={gp})")
 fig_ldagl.update_layout({'colorway': ['red', 'blue', 'green', 'orange']})
 fig_ldagl.update_yaxes(type="log")
 save_figure(fig_ldagl, f"{path}/ldagl")

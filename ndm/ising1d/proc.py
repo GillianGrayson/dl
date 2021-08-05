@@ -3,24 +3,24 @@ import numpy as np
 from numpy import linalg as la
 import pandas as pd
 import os
-
+from tqdm import tqdm
 
 # Model params
 model = 'ising1d'
-L = 4
+L = 6
 gp = 0.3
 Vp = 2.0
 
-path = f"/media/sf_Work/dl/netket/{model}/L({L}_V({Vp})_g({gp}))"
+path = f"/media/sf_Work/dl/netket/{model}/L({L})_V({Vp})_g({gp})"
 if not os.path.exists(f"{path}"):
     os.makedirs(f"{path}")
 
 # Ansatz params
-beta = 8
-alpha = 8
+beta = 4
+alpha = 4
 n_samples = 2000
-n_samples_diag = 1000
-n_iter = 1000
+n_samples_diag = 2000
+n_iter = 500
 
 # Create graph
 g = nk.graph.Hypercube(length=L, n_dim=1, pbc=False)
@@ -69,21 +69,21 @@ sa = nk.sampler.MetropolisLocal(lind.hilbert)
 op = nk.optimizer.Sgd(0.01)
 sr = nk.optimizer.SR(diag_shift=0.01)
 
-vs = nk.variational.MCMixedState(sa, ma, n_samples=n_samples, n_samples_diag=n_samples_diag)
+vs = nk.vqs.MCMixedState(sa, ma, n_samples=n_samples, n_samples_diag=n_samples_diag)
 vs.init_parameters(nk.nn.initializers.normal(stddev=0.01))
 ss = nk.SteadyState(lind, op, variational_state=vs, preconditioner=sr)
 obs = {"Sx": obs_sx, "Sy": obs_sy, "Sz": obs_sz}
 
 rho_exact = nk.exact.steady_state(lind)
 metrics_dict = {
-    'iteration': np.linspace(1, n_iter+1, n_iter),
+    'iteration': np.linspace(1, n_iter, n_iter),
     'ldagl_mean': [],
     'ldagl_error_of_mean': [],
     'norm_rho_diff_1': [],
     'norm_rho_diff_2': []
 }
 
-for it in range(n_iter):
+for it in tqdm(range(n_iter)):
     out = ss.run(n_iter=1)
     metrics_dict['ldagl_mean'].append(ss.ldagl.mean)
     metrics_dict['ldagl_error_of_mean'].append(ss.ldagl.error_of_mean)
