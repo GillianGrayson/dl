@@ -17,11 +17,11 @@ dt = 1
 gamma = 0.1
 
 # Ansatz params
-beta = 2
-alpha = 2
+beta = 6
+alpha = 6
 n_samples = 5000
 n_samples_diag = 1000
-n_iter = 1000
+n_iter = 500
 
 np.random.seed(seed)
 
@@ -87,8 +87,8 @@ metrics_dict = {
 }
 
 # Calculate exact rho
-#rho_exact = nk.exact.steady_state(lind, method="iterative", sparse=True, tol=1e-10)
-rho_exact = nk.exact.steady_state(lind)
+rho_exact = nk.exact.steady_state(lind, method="iterative", sparse=True, tol=1e-10)
+#rho_exact = nk.exact.steady_state(lind)
 
 for it in tqdm(range(n_iter)):
     out = ss.run(n_iter=1)

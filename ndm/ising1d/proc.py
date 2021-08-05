@@ -16,9 +16,9 @@ if not os.path.exists(f"{path}"):
     os.makedirs(f"{path}")
 
 # Ansatz params
-beta = 6
-alpha = 6
-n_samples = 1000
+beta = 4
+alpha = 4
+n_samples = 4000
 n_samples_diag = 1000
 n_iter = 500
 
@@ -96,7 +96,7 @@ for it in tqdm(range(n_iter)):
     metrics_dict['norm_rho_diff_2'].append(la.norm(rho_diff_2))
 
 metrics_df = pd.DataFrame(metrics_dict)
-metrics_df.to_excel(f"{path}/metrics_alpha({alpha})_beta({beta}).xlsx", index=False)
+metrics_df.to_excel(f"{path}/metrics_size({alpha}_{beta})_samples({n_samples}_{n_samples_diag}).xlsx", index=False)
 
 # ss.reset()
 # out = ss.run(n_iter=n_iter, out="test", obs=obs)
