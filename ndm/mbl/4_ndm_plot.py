@@ -8,7 +8,7 @@ from ndm.plot.save import save_figure
 model = 'mbl'
 N = 8
 seed = 1
-W = 20.0
+W = 1.0
 U = 1.0
 J = 1.0
 dt = 1
@@ -19,7 +19,7 @@ path = f"/media/sf_Work/dl/netket/{model}/N({N})_rnd({seed})_H({W:0.4f}_{U:0.4f}
 # Ansatz params
 
 params = [
-    {"alpha": 2, "beta": 2, 'n_samples': 1000, 'n_samples_diag': 1000},
+    #{"alpha": 2, "beta": 2, 'n_samples': 1000, 'n_samples_diag': 1000},
     {"alpha": 2, "beta": 2, 'n_samples': 5000, 'n_samples_diag': 1000},
     #{"alpha": 2, "beta": 2, 'n_samples': 5000, 'n_samples_diag': 5000}
 ]

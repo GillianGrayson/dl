@@ -10,15 +10,15 @@ from tqdm import tqdm
 model = 'mbl'
 N = 8
 seed = 1
-W = 20.0
+W = 1.0
 U = 1.0
 J = 1.0
 dt = 1
 gamma = 0.1
 
 # Ansatz params
-beta = 6
-alpha = 6
+beta = 2
+alpha = 2
 n_samples = 5000
 n_samples_diag = 1000
 n_iter = 500
