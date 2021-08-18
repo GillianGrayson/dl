@@ -1,15 +1,13 @@
 import netket as nk
 import numpy as np
-from numpy import linalg as la
-import pandas as pd
-import os
 from netket.hilbert import Fock
 from tqdm import tqdm
+import collections
+
 
 # Model params
-model = 'mbl'
 N = 8
-seed = 3
+seed = 42
 W = 1.0
 U = 1.0
 J = 1.0
@@ -24,26 +22,17 @@ n_samples_diag = 2000
 n_iter = 1000
 
 np.random.seed(seed)
-
-cpp_path = f"/media/sf_Work/dl/netket/{model}/test/cpp"
-save_path = f"/media/sf_Work/dl/netket/{model}/N({N})_rnd({seed})_H({W:0.4f}_{U:0.4f}_{J:0.4f})_D({dt}_{gamma:0.4f})"
-if not os.path.exists(f"{save_path}"):
-    os.makedirs(f"{save_path}")
-
 energies = np.random.uniform(-1.0, 1.0, N)
 
+# Graph
 g = nk.graph.Hypercube(N, n_dim=1, pbc=False)
-
 # Hilbert space
-#hi = Fock(n_max=1, n_particles=N//2, N=N)
 hi = Fock(n_max=1, n_particles=N//2, N=g.n_nodes)
 
 # The Hamiltonian
 ha = nk.operator.LocalOperator(hi)
-
 # List of dissipative jump operators
 j_ops = []
-
 for boson_id in range(N - 1):
     ha += W * energies[boson_id] * nk.operator.boson.number(hi, boson_id)
     ha += U * nk.operator.boson.number(hi, boson_id) * nk.operator.boson.number(hi, boson_id + 1)
@@ -82,27 +71,16 @@ vs.init_parameters(nk.nn.initializers.normal(stddev=0.01))
 # Driver
 ss = nk.SteadyState(lind, op, variational_state=vs, preconditioner=sr)
 
-metrics_dict = {
-    'iteration': np.linspace(1, n_iter, n_iter),
-    'ldagl_mean': [],
-    'ldagl_error_of_mean': [],
-    'norm_rho_diff': [],
-    'norm_rho_diff_conj': []
-}
+# Get batch og samples
+batch_of_samples = np.asarray(vs.samples.reshape((-1, vs.samples.shape[-1])))
 
-# Calculate exact rho
-rho_exact = nk.exact.steady_state(lind, method="iterative", sparse=True, tol=1e-10)
-#rho_exact = nk.exact.steady_state(lind)
+# Allowed states
+allowed_states = vs.hilbert.all_states()
 
-for it in tqdm(range(n_iter)):
-    out = ss.run(n_iter=1)
-    metrics_dict['ldagl_mean'].append(ss.ldagl.mean)
-    metrics_dict['ldagl_error_of_mean'].append(ss.ldagl.error_of_mean)
-    rho_neural = np.array(ss.state.to_matrix())
-    rho_diff = rho_exact - rho_neural
-    rho_diff_conj = rho_exact - rho_neural.conjugate()
-    metrics_dict['norm_rho_diff'].append(la.norm(rho_diff))
-    metrics_dict['norm_rho_diff_conj'].append(la.norm(rho_diff_conj))
-
-metrics_df = pd.DataFrame(metrics_dict)
-metrics_df.to_excel(f"{save_path}/metrics_size({alpha}_{beta})_samples({n_samples}_{n_samples_diag}).xlsx", index=False)
+# Check samples
+num_non_exist = 0
+for st_id in range(0, batch_of_samples.shape[0]):
+    is_exist = np.equal(allowed_states, batch_of_samples[st_id, :]).all(1).any()
+    if not is_exist:
+        num_non_exist += 1
+print(f"Number of non-existing states in space: {num_non_exist} out of {batch_of_samples.shape[0]}")
