@@ -57,21 +57,23 @@ ndm = nk.models.NDM(
 )
 
 # Metropolis Local Sampling
-sa = nk.sampler.MetropolisLocal(lind.hilbert)
-#sa = nk.sampler.MetropolisExchange(lind.hilbert, graph=g)
+# sa = nk.sampler.MetropolisLocal(lind.hilbert)
+# sa = nk.sampler.MetropolisExchange(lind.hilbert, graph=g)
+sa = nk.sampler.MetropolisHamiltonian(lind.hilbert, hamiltonian=lind)
 
 # Optimizer
 op = nk.optimizer.Sgd(0.01)
 sr = nk.optimizer.SR(diag_shift=0.01)
 
 # Variational state
-vs = nk.vqs.MCMixedState(sa, ndm, n_samples=n_samples, n_samples_diag=n_samples_diag)
+#vs = nk.vqs.MCMixedState(sampler=sa, model=ndm, n_samples=n_samples, n_samples_diag=n_samples_diag)
+vs = nk.vqs.MCMixedState(sampler=sa, model=ndm, n_samples=n_samples, n_samples_diag=0)
 vs.init_parameters(nk.nn.initializers.normal(stddev=0.01))
 
 # Driver
 ss = nk.SteadyState(lind, op, variational_state=vs, preconditioner=sr)
 
-# Get batch og samples
+# Get batch of samples
 batch_of_samples = np.asarray(vs.samples.reshape((-1, vs.samples.shape[-1])))
 
 # Allowed states
