@@ -47,8 +47,8 @@ ndm = nk.models.NDM(
 
 # Metropolis Local Sampling
 # sa = nk.sampler.MetropolisLocal(lind.hilbert)
-sa = nk.sampler.MetropolisHamiltonian(lind.hilbert, hamiltonian=lind)
-#sa = nk.sampler.MetropolisExchange(lind.hilbert, graph=g)
+# sa = nk.sampler.MetropolisHamiltonian(lind.hilbert, hamiltonian=lind)
+# sa = nk.sampler.MetropolisExchange(lind.hilbert, graph=g)
 
 # Optimizer
 #op = nk.optimizer.Sgd(0.01)
