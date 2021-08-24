@@ -1,9 +1,7 @@
 import netket as nk
 import numpy as np
-import pandas as pd
 from netket.hilbert import Fock
 from tqdm import tqdm
-import collections
 
 
 # Model params
@@ -24,10 +22,8 @@ n_iter = 10
 np.random.seed(seed)
 energies = np.random.uniform(-1.0, 1.0, N)
 
-# Graph
-g = nk.graph.Hypercube(N, n_dim=1, pbc=False)
 # Hilbert space
-hi = Fock(n_max=1, n_particles=N//2, N=g.n_nodes)
+hi = Fock(n_max=1, n_particles=N//2, N=N)
 
 # The Hamiltonian
 ha = nk.operator.LocalOperator(hi)
@@ -56,43 +52,22 @@ ndm = nk.models.NDM(
     beta=beta,
 )
 
-# Metropolis Local Sampling
-# sa = nk.sampler.MetropolisLocal(lind.hilbert)
-sa_graph = nk.graph.Hypercube(N, n_dim=1, pbc=False)
-
-clusters = []
-for i in range(N):
-    for j in range(N):
-        clusters.append([i, j+N])
-sa = nk.sampler.MetropolisExchange(lind.hilbert, graph=sa_graph)
-# sa = nk.sampler.MetropolisExchange(lind.hilbert, graph=sa_graph, d_max=N)
-# sa = nk.sampler.MetropolisExchange(lind.hilbert, clusters=clusters)
-# sa = nk.sampler.MetropolisHamiltonian(lind.hilbert, hamiltonian=lind)
-
-# Optimizer
-op = nk.optimizer.Sgd(0.01)
-sr = nk.optimizer.SR(diag_shift=0.01)
+# Metropolis Sampling
+graph = nk.graph.Hypercube(N, n_dim=1, pbc=False)
+sa = nk.sampler.MetropolisExchange(lind.hilbert, graph=graph)
 
 # Variational state
 vs = nk.vqs.MCMixedState(sampler=sa, model=ndm, n_samples=n_samples)
 vs.init_parameters(nk.nn.initializers.normal(stddev=0.01))
 
-# Driver
-ss = nk.SteadyState(lind, op, variational_state=vs, preconditioner=sr)
-
 # Allowed states
 allowed_states = vs.hilbert.all_states()
+
+# Allowed states statistics
 states_dist = {}
 for st in allowed_states:
     str_st = np.array2string(st, separator='')[1:-1].replace('.', '')
     states_dist[str_st] = 0
-
-states_1d_str = []
-for st in vs.hilbert_physical.all_states():
-    str_st = np.array2string(st, separator='')[1:-1].replace('.', '')
-    states_1d_str.append(str_st)
-
-states_mtx = pd.DataFrame(data=np.zeros(shape=[len(states_1d_str), len(states_1d_str)]), index=states_1d_str, columns=states_1d_str)
 
 for it in range(n_iter):
 
@@ -102,13 +77,13 @@ for it in range(n_iter):
     # Check samples
     num_non_exist = 0
     for st_id in tqdm(range(0, batch_of_samples.shape[0])):
-        is_exist = np.equal(allowed_states, batch_of_samples[st_id, :]).all(1).any()
-        if not is_exist:
+        str_st = np.array2string(batch_of_samples[st_id, :], separator='')[1:-1].replace('.', '')
+        if str_st not in states_dist:
             num_non_exist += 1
         else:
             str_st = np.array2string(batch_of_samples[st_id, :], separator='')[1:-1].replace('.', '')
             states_dist[str_st] += 1
-            states_mtx.loc[str_st[0:N], str_st[N::]] += 1
+
     print(f"Number of non-existing states in space: {num_non_exist} out of {batch_of_samples.shape[0]}")
 
     non_zero_states = np.count_nonzero(list(states_dist.values()))
