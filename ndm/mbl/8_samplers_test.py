@@ -57,17 +57,9 @@ ndm = nk.models.NDM(
 )
 
 # Metropolis Local Sampling
-# sa = nk.sampler.MetropolisLocal(lind.hilbert)
-sa_graph = nk.graph.Hypercube(N, n_dim=1, pbc=False)
-
-clusters = []
-for i in range(N):
-    for j in range(N):
-        clusters.append([i, j+N])
+graph = nk.graph.Hypercube(N, n_dim=1, pbc=False)
+sa_graph = nk.graph.disjoint_union(graph, graph)
 sa = nk.sampler.MetropolisExchange(lind.hilbert, graph=sa_graph)
-# sa = nk.sampler.MetropolisExchange(lind.hilbert, graph=sa_graph, d_max=N)
-# sa = nk.sampler.MetropolisExchange(lind.hilbert, clusters=clusters)
-# sa = nk.sampler.MetropolisHamiltonian(lind.hilbert, hamiltonian=lind)
 
 # Optimizer
 op = nk.optimizer.Sgd(0.01)

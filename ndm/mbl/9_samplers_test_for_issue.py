@@ -53,7 +53,7 @@ ndm = nk.models.NDM(
 )
 
 # Metropolis Sampling
-graph = nk.graph.Hypercube(N, n_dim=1, pbc=False)
+graph = nk.graph.Hypercube(10, n_dim=1, pbc=False)
 sa = nk.sampler.MetropolisExchange(lind.hilbert, graph=graph)
 
 # Variational state
